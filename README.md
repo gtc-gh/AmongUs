@@ -111,7 +111,9 @@ Semantic_pred_results.csv: The list of predicted semantic results, including all
 --------------------------------------------------------------------------------------
 
 ## RQ3
-10,000 real apps shared by Google Drive.
+### 10,000 real apps shared by Google Drive.
+
+We randomly selected 10,000 apps, published after 2020-01-01, from AndroZoo to set up the mobile app dataset of our experiment. The timeout setting for analyzing each app is 20 minutes. A 20-minute timeout is deemed appropriate for our study, considering that the majority of apps can undergo successful analysis within this timeframe.
 
 --------------------------------------------------------------------------------------
 
