@@ -1,0 +1,2387 @@
+Number,Signature,Early_Version,Late_Version,Early_Signature,Late_Signature,Diff_Signature,Early_Implementation,Late_Implementation,Diff_Implementation,Early_Comment,Late_Comment,Diff_Comment,Early_Annotation,Late_Annotation,Diff_Annotation,Early_Callback,Late_Callback,Diff_Callback,GT_CI_ControlFlow,GT_CI_Type,pred_change,pred_CI,change_description,CI_description
+1,<android.nfc.NfcAdapter: boolean isEnabled()>,9,10,<android.nfc.NfcAdapter: boolean isEnabled()>,<android.nfc.NfcAdapter: boolean isEnabled()>,0,"{
+    try {
+        return mService.isEnabled();
+    } catch (RemoteException e) {
+        attemptDeadServiceRecovery(e);
+        return false;
+    }
+}","{
+    try {
+        return sService.isEnabled();
+    } catch (RemoteException e) {
+        attemptDeadServiceRecovery(e);
+        return false;
+    }
+}",1,"/**
+ * Return true if this NFC Adapter has any features enabled.
+ * <p>
+ * If this method returns false, then applications should request the user
+ * turn on NFC tag discovery in Settings.
+ * <p>
+ * If this method returns false, the NFC hardware is guaranteed not to
+ * perform or respond to any NFC communication.
+ *
+ * @return true if this NFC Adapter is enabled to discover new tags
+ */
+","/**
+ * Return true if this NFC Adapter has any features enabled.
+ * <p>
+ * If this method returns false, then applications should request the user
+ * turn on NFC tag discovery in Settings.
+ * <p>
+ * If this method returns false, the NFC hardware is guaranteed not to
+ * perform or respond to any NFC communication.
+ *
+ * @return true if this NFC Adapter is enabled to discover new tags
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,4,0,"The invoked API in return statement has changed from mService.isEnabled() to sService.isEnabled(), while the rest of the code remains the same, so the code change type is 4.","There is no Compatibility Issue detected as the API in both versions exhibit the same behaviour. The return values and exception handling stay the same despite the different services being used. Therefore, the CI type is 0."
+2,<android.widget.AbsListView: Parcelable onSaveInstanceState()>,9,10,<android.widget.AbsListView: Parcelable onSaveInstanceState()>,<android.widget.AbsListView: Parcelable onSaveInstanceState()>,0,"{
+    /*
+         * This doesn't really make sense as the place to dismiss the
+         * popups, but there don't seem to be any other useful hooks
+         * that happen early enough to keep from getting complaints
+         * about having leaked the window.
+         */
+    dismissPopup();
+    Parcelable superState = super.onSaveInstanceState();
+    SavedState ss = new SavedState(superState);
+    boolean haveChildren = getChildCount() > 0;
+    long selectedId = getSelectedItemId();
+    ss.selectedId = selectedId;
+    ss.height = getHeight();
+    if (selectedId >= 0) {
+        // Remember the selection
+        ss.viewTop = mSelectedTop;
+        ss.position = getSelectedItemPosition();
+        ss.firstId = INVALID_POSITION;
+    } else {
+        if (haveChildren) {
+            // Remember the position of the first child
+            View v = getChildAt(0);
+            ss.viewTop = v.getTop();
+            ss.position = mFirstPosition;
+            ss.firstId = mAdapter.getItemId(mFirstPosition);
+        } else {
+            ss.viewTop = 0;
+            ss.firstId = INVALID_POSITION;
+            ss.position = 0;
+        }
+    }
+    ss.filter = null;
+    if (mFiltered) {
+        final EditText textFilter = mTextFilter;
+        if (textFilter != null) {
+            Editable filterText = textFilter.getText();
+            if (filterText != null) {
+                ss.filter = filterText.toString();
+            }
+        }
+    }
+    return ss;
+}","{
+    /*
+         * This doesn't really make sense as the place to dismiss the
+         * popups, but there don't seem to be any other useful hooks
+         * that happen early enough to keep from getting complaints
+         * about having leaked the window.
+         */
+    dismissPopup();
+    Parcelable superState = super.onSaveInstanceState();
+    SavedState ss = new SavedState(superState);
+    boolean haveChildren = getChildCount() > 0 && mItemCount > 0;
+    long selectedId = getSelectedItemId();
+    ss.selectedId = selectedId;
+    ss.height = getHeight();
+    if (selectedId >= 0) {
+        // Remember the selection
+        ss.viewTop = mSelectedTop;
+        ss.position = getSelectedItemPosition();
+        ss.firstId = INVALID_POSITION;
+    } else {
+        if (haveChildren && mFirstPosition > 0) {
+            // Remember the position of the first child.
+            // We only do this if we are not currently at the top of
+            // the list, for two reasons:
+            // (1) The list may be in the process of becoming empty, in
+            // which case mItemCount may not be 0, but if we try to
+            // ask for any information about position 0 we will crash.
+            // (2) Being ""at the top"" seems like a special case, anyway,
+            // and the user wouldn't expect to end up somewhere else when
+            // they revisit the list even if its content has changed.
+            View v = getChildAt(0);
+            ss.viewTop = v.getTop();
+            int firstPos = mFirstPosition;
+            if (firstPos >= mItemCount) {
+                firstPos = mItemCount - 1;
+            }
+            ss.position = firstPos;
+            ss.firstId = mAdapter.getItemId(firstPos);
+        } else {
+            ss.viewTop = 0;
+            ss.firstId = INVALID_POSITION;
+            ss.position = 0;
+        }
+    }
+    ss.filter = null;
+    if (mFiltered) {
+        final EditText textFilter = mTextFilter;
+        if (textFilter != null) {
+            Editable filterText = textFilter.getText();
+            if (filterText != null) {
+                ss.filter = filterText.toString();
+            }
+        }
+    }
+    return ss;
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,3,1,"The condition of the 'haveChildren' variable and the assigning of 'ss.position' and 'ss.firstId' under the 'haveChildren && mFirstPosition > 0' condition have changed, so the change type is 3.","Due to the change in logic, the 'return ss' might result in different values of 'ss.position' and 'ss.firstId' on the conditions, hence the CI type is 1."
+3,"<android.speech.tts.TextToSpeech: int synthesizeToFile(String,HashMap<String, String>,String)>",9,10,"<android.speech.tts.TextToSpeech: int synthesizeToFile(String,HashMap<String, String>,String)>","<android.speech.tts.TextToSpeech: int synthesizeToFile(String,HashMap<String, String>,String)>",0,"{
+    synchronized (mStartLock) {
+        int result = ERROR;
+        if (!mStarted) {
+            return result;
+        }
+        try {
+            if ((params != null) && (!params.isEmpty())) {
+                // no need to read the stream type here
+                String extra = params.get(Engine.KEY_PARAM_UTTERANCE_ID);
+                if (extra != null) {
+                    mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = extra;
+                }
+                extra = params.get(Engine.KEY_PARAM_ENGINE);
+                if (extra != null) {
+                    mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = extra;
+                }
+            }
+            result = mITts.synthesizeToFile(mPackageName, text, mCachedParams, filename) ? SUCCESS : ERROR;
+        } catch (RemoteException e) {
+            // TTS died; restart it.
+            Log.e(""TextToSpeech.java - synthesizeToFile"", ""RemoteException"");
+            e.printStackTrace();
+            mStarted = false;
+            initTts();
+        } catch (NullPointerException e) {
+            // TTS died; restart it.
+            Log.e(""TextToSpeech.java - synthesizeToFile"", ""NullPointerException"");
+            e.printStackTrace();
+            mStarted = false;
+            initTts();
+        } catch (IllegalStateException e) {
+            // TTS died; restart it.
+            Log.e(""TextToSpeech.java - synthesizeToFile"", ""IllegalStateException"");
+            e.printStackTrace();
+            mStarted = false;
+            initTts();
+        } finally {
+            resetCachedParams();
+            return result;
+        }
+    }
+}","{
+    synchronized (mStartLock) {
+        int result = ERROR;
+        Log.i(""TextToSpeech.java - synthesizeToFile"", ""synthesizeToFile text of length "" + text.length());
+        if (!mStarted) {
+            Log.e(""TextToSpeech.java - synthesizeToFile"", ""service isn't started"");
+            return result;
+        }
+        try {
+            if ((params != null) && (!params.isEmpty())) {
+                // no need to read the stream type here
+                String extra = params.get(Engine.KEY_PARAM_UTTERANCE_ID);
+                if (extra != null) {
+                    mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = extra;
+                }
+                extra = params.get(Engine.KEY_PARAM_ENGINE);
+                if (extra != null) {
+                    mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = extra;
+                }
+            }
+            result = mITts.synthesizeToFile(mPackageName, text, mCachedParams, filename) ? SUCCESS : ERROR;
+        } catch (RemoteException e) {
+            // TTS died; restart it.
+            Log.e(""TextToSpeech.java - synthesizeToFile"", ""RemoteException"");
+            e.printStackTrace();
+            mStarted = false;
+            initTts();
+        } catch (NullPointerException e) {
+            // TTS died; restart it.
+            Log.e(""TextToSpeech.java - synthesizeToFile"", ""NullPointerException"");
+            e.printStackTrace();
+            mStarted = false;
+            initTts();
+        } catch (IllegalStateException e) {
+            // TTS died; restart it.
+            Log.e(""TextToSpeech.java - synthesizeToFile"", ""IllegalStateException"");
+            e.printStackTrace();
+            mStarted = false;
+            initTts();
+        } finally {
+            resetCachedParams();
+            return result;
+        }
+    }
+}",1,"/**
+ * Synthesizes the given text to a file using the specified parameters.
+ *
+ * @param text
+ * The String of text that should be synthesized
+ * @param params
+ * The list of parameters to be used. Can be null if no parameters are given.
+ * They are specified using a (key, value) pair, where the key can be
+ * {@link Engine#KEY_PARAM_UTTERANCE_ID}.
+ * @param filename
+ * The string that gives the full output filename; it should be
+ * something like ""/sdcard/myappsounds/mysound.wav"".
+ *
+ * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+ */
+","/**
+ * Synthesizes the given text to a file using the specified parameters.
+ *
+ * @param text
+ * The String of text that should be synthesized
+ * @param params
+ * The list of parameters to be used. Can be null if no parameters are given.
+ * They are specified using a (key, value) pair, where the key can be
+ * {@link Engine#KEY_PARAM_UTTERANCE_ID}.
+ * @param filename
+ * The string that gives the full output filename; it should be
+ * something like ""/sdcard/myappsounds/mysound.wav"".
+ *
+ * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,4,0,"Only the logs information has been added in the updated code. Besides that, all the core functionality/processing remain the same in both the versions. Thus, the change type is classified as 4.","The changes in the code are related to logging information and they do not affect any exception handling or return values. Therefore, no compatibility issues exist in the code change, hence the CI type is 0."
+4,"<android.os.storage.IObbActionListener.Stub.Proxy: void onObbResult(String,int,int)>",9,10,"<android.os.storage.IObbActionListener.Stub.Proxy: void onObbResult(String,int,int)>","<android.os.storage.IObbActionListener.Stub.Proxy: void onObbResult(String,int,int)>",0,"{
+    Parcel _data = Parcel.obtain();
+    Parcel _reply = Parcel.obtain();
+    try {
+        _data.writeInterfaceToken(DESCRIPTOR);
+        _data.writeString(filename);
+        _data.writeInt(nonce);
+        _data.writeInt(status);
+        mRemote.transact(Stub.TRANSACTION_onObbResult, _data, _reply, 0);
+        _reply.readException();
+    } finally {
+        _reply.recycle();
+        _data.recycle();
+    }
+}","{
+    Parcel _data = Parcel.obtain();
+    Parcel _reply = Parcel.obtain();
+    try {
+        _data.writeInterfaceToken(DESCRIPTOR);
+        _data.writeString(filename);
+        _data.writeInt(nonce);
+        _data.writeInt(status);
+        mRemote.transact(Stub.TRANSACTION_onObbResult, _data, _reply, android.os.IBinder.FLAG_ONEWAY);
+        _reply.readException();
+    } finally {
+        _reply.recycle();
+        _data.recycle();
+    }
+}",1,"/**
+ * Return from an OBB action result.
+ *
+ * @param filename the path to the OBB the operation was performed
+ * on
+ * @param returnCode status of the operation
+ */
+","/**
+ * Return from an OBB action result.
+ *
+ * @param filename the path to the OBB the operation was performed
+ * on
+ * @param returnCode status of the operation
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,4,0,"The method `mRemote.transact`'s fourth parameter has changed from 0 to `android.os.IBinder.FLAG_ONEWAY`, which is considered as another statement change, so the change type is 4.","Even though the parameter of the `mRemote.transact` method has changed, it doesn't cause the method to return a different variable or throw different exceptions, therefore, the CI type is 0."
+5,<android.view.WindowOrientationListener.SensorEventListenerImpl: void onSensorChanged(SensorEvent)>,9,10,<android.view.WindowOrientationListener.SensorEventListenerImpl: void onSensorChanged(SensorEvent)>,<android.view.WindowOrientationListener.SensorEventListenerImpl: void onSensorChanged(SensorEvent)>,0,"{
+    // the vector given in the SensorEvent points straight up (towards the sky) under ideal
+    // conditions (the phone is not accelerating).  i'll call this upVector elsewhere.
+    float x = event.values[_DATA_X];
+    float y = event.values[_DATA_Y];
+    float z = event.values[_DATA_Z];
+    float magnitude = vectorMagnitude(x, y, z);
+    float deviation = Math.abs(magnitude - SensorManager.STANDARD_GRAVITY);
+    handleAccelerationDistrust(deviation);
+    // only filter tilt when we're accelerating
+    float alpha = 1;
+    if (mAccelerationDistrust > 0) {
+        alpha = ACCELERATING_LOWPASS_ALPHA;
+    }
+    float newTiltAngle = tiltAngle(z, magnitude);
+    mTiltAngle = lowpassFilter(newTiltAngle, mTiltAngle, alpha);
+    float absoluteTilt = Math.abs(mTiltAngle);
+    checkFullyTilted(absoluteTilt);
+    if (mTiltDistrust > 0) {
+        // when fully tilted, ignore orientation entirely
+        return;
+    }
+    float newOrientationAngle = computeNewOrientation(x, y);
+    filterOrientation(absoluteTilt, newOrientationAngle);
+    calculateNewRotation(mOrientationAngle, absoluteTilt);
+}","{
+    // the vector given in the SensorEvent points straight up (towards the sky) under ideal
+    // conditions (the phone is not accelerating).  i'll call this upVector elsewhere.
+    float x = event.values[_DATA_X];
+    float y = event.values[_DATA_Y];
+    float z = event.values[_DATA_Z];
+    float magnitude = vectorMagnitude(x, y, z);
+    float deviation = Math.abs(magnitude - SensorManager.STANDARD_GRAVITY);
+    handleAccelerationDistrust(deviation);
+    if (magnitude < MIN_ABS_ACCELERATION) {
+        // Ignore tilt and orientation when (0, 0, 0) or low reading
+        return;
+    }
+    // only filter tilt when we're accelerating
+    float alpha = 1;
+    if (mAccelerationDistrust > 0) {
+        alpha = ACCELERATING_LOWPASS_ALPHA;
+    }
+    float newTiltAngle = tiltAngle(z, magnitude);
+    mTiltAngle = lowpassFilter(newTiltAngle, mTiltAngle, alpha);
+    float absoluteTilt = Math.abs(mTiltAngle);
+    checkFullyTilted(absoluteTilt);
+    if (mTiltDistrust > 0) {
+        // when fully tilted, ignore orientation entirely
+        return;
+    }
+    float newOrientationAngle = computeNewOrientation(x, y);
+    filterOrientation(absoluteTilt, newOrientationAngle);
+    calculateNewRotation(mOrientationAngle, absoluteTilt);
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"3,1",1,"The condition statement (`if (magnitude < MIN_ABS_ACCELERATION)` and the corresponding `return` inside it) is added in the late_version code, so the change type is 3,1.","Due to the introduced 'if' condition and subsequent return statement, the late version has a chance to return without reaching the later parts of the code, causing the overall behaviour of the API to be different, so the CI type is 1."
+6,"<android.widget.TextView: void onFocusChanged(boolean,int,Rect)>",9,10,"<android.widget.TextView: void onFocusChanged(boolean,int,Rect)>","<android.widget.TextView: void onFocusChanged(boolean,int,Rect)>",0,"{
+    if (mTemporaryDetach) {
+        // If we are temporarily in the detach state, then do nothing.
+        super.onFocusChanged(focused, direction, previouslyFocusedRect);
+        return;
+    }
+    mShowCursor = SystemClock.uptimeMillis();
+    ensureEndedBatchEdit();
+    if (focused) {
+        int selStart = getSelectionStart();
+        int selEnd = getSelectionEnd();
+        if (!mFrozenWithFocus || (selStart < 0 || selEnd < 0)) {
+            // If a tap was used to give focus to that view, move cursor at tap position.
+            // Has to be done before onTakeFocus, which can be overloaded.
+            final int lastTapPosition = getLastTapPosition();
+            if (lastTapPosition >= 0) {
+                Selection.setSelection((Spannable) mText, lastTapPosition);
+            }
+            if (mMovement != null) {
+                mMovement.onTakeFocus(this, (Spannable) mText, direction);
+            }
+            if (mSelectAllOnFocus) {
+                Selection.setSelection((Spannable) mText, 0, mText.length());
+            }
+            // It would be better to know why the DecorView does not have focus at that time.
+            if (((this instanceof ExtractEditText) || mSelectionMoved) && selStart >= 0 && selEnd >= 0) {
+                /*
+                     * Someone intentionally set the selection, so let them
+                     * do whatever it is that they wanted to do instead of
+                     * the default on-focus behavior.  We reset the selection
+                     * here instead of just skipping the onTakeFocus() call
+                     * because some movement methods do something other than
+                     * just setting the selection in theirs and we still
+                     * need to go through that path.
+                     */
+                Selection.setSelection((Spannable) mText, selStart, selEnd);
+            }
+            mTouchFocusSelected = true;
+        }
+        mFrozenWithFocus = false;
+        mSelectionMoved = false;
+        if (mText instanceof Spannable) {
+            Spannable sp = (Spannable) mText;
+            MetaKeyKeyListener.resetMetaState(sp);
+        }
+        makeBlink();
+        if (mError != null) {
+            showError();
+        }
+    } else {
+        if (mError != null) {
+            hideError();
+        }
+        // Don't leave us in the middle of a batch edit.
+        onEndBatchEdit();
+        hideInsertionPointCursorController();
+        if (this instanceof ExtractEditText) {
+            // terminateTextSelectionMode would remove selection, which we want to keep when
+            // ExtractEditText goes out of focus.
+            mIsInTextSelectionMode = false;
+        } else {
+            terminateTextSelectionMode();
+        }
+        if (mSelectionModifierCursorController != null) {
+            ((SelectionModifierCursorController) mSelectionModifierCursorController).resetTouchOffsets();
+        }
+    }
+    startStopMarquee(focused);
+    if (mTransformation != null) {
+        mTransformation.onFocusChanged(this, mText, focused, direction, previouslyFocusedRect);
+    }
+    super.onFocusChanged(focused, direction, previouslyFocusedRect);
+}","{
+    if (mTemporaryDetach) {
+        // If we are temporarily in the detach state, then do nothing.
+        super.onFocusChanged(focused, direction, previouslyFocusedRect);
+        return;
+    }
+    mShowCursor = SystemClock.uptimeMillis();
+    ensureEndedBatchEdit();
+    if (focused) {
+        int selStart = getSelectionStart();
+        int selEnd = getSelectionEnd();
+        // SelectAllOnFocus fields are highlighted and not selected. Do not start text selection
+        // mode for these, unless there was a specific selection already started.
+        final boolean isFocusHighlighted = mSelectAllOnFocus && selStart == 0 && selEnd == mText.length();
+        mCreatedWithASelection = mFrozenWithFocus && hasSelection() && !isFocusHighlighted;
+        if (!mFrozenWithFocus || (selStart < 0 || selEnd < 0)) {
+            // If a tap was used to give focus to that view, move cursor at tap position.
+            // Has to be done before onTakeFocus, which can be overloaded.
+            final int lastTapPosition = getLastTapPosition();
+            if (lastTapPosition >= 0) {
+                Selection.setSelection((Spannable) mText, lastTapPosition);
+            }
+            if (mMovement != null) {
+                mMovement.onTakeFocus(this, (Spannable) mText, direction);
+            }
+            // It would be better to know why the DecorView does not have focus at that time.
+            if (((this instanceof ExtractEditText) || mSelectionMoved) && selStart >= 0 && selEnd >= 0) {
+                /*
+                     * Someone intentionally set the selection, so let them
+                     * do whatever it is that they wanted to do instead of
+                     * the default on-focus behavior.  We reset the selection
+                     * here instead of just skipping the onTakeFocus() call
+                     * because some movement methods do something other than
+                     * just setting the selection in theirs and we still
+                     * need to go through that path.
+                     */
+                Selection.setSelection((Spannable) mText, selStart, selEnd);
+            }
+            if (mSelectAllOnFocus) {
+                Selection.setSelection((Spannable) mText, 0, mText.length());
+            }
+            mTouchFocusSelected = true;
+        }
+        mFrozenWithFocus = false;
+        mSelectionMoved = false;
+        if (mText instanceof Spannable) {
+            Spannable sp = (Spannable) mText;
+            MetaKeyKeyListener.resetMetaState(sp);
+        }
+        makeBlink();
+        if (mError != null) {
+            showError();
+        }
+    } else {
+        if (mError != null) {
+            hideError();
+        }
+        // Don't leave us in the middle of a batch edit.
+        onEndBatchEdit();
+        hideInsertionPointCursorController();
+        if (this instanceof ExtractEditText) {
+            // terminateTextSelectionMode would remove selection, which we want to keep when
+            // ExtractEditText goes out of focus.
+            mIsInTextSelectionMode = false;
+        } else {
+            stopTextSelectionMode();
+        }
+        if (mSelectionModifierCursorController != null) {
+            ((SelectionModifierCursorController) mSelectionModifierCursorController).resetTouchOffsets();
+        }
+    }
+    startStopMarquee(focused);
+    if (mTransformation != null) {
+        mTransformation.onFocusChanged(this, mText, focused, direction, previouslyFocusedRect);
+    }
+    super.onFocusChanged(focused, direction, previouslyFocusedRect);
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,"3,4",1,"The condition statement after 'focused' and the statement (terminateTextSelectionMode() to stopTextSelectionMode()) under this condition statement have changed, so the code change type is 3,4.","As the condition statement 'focused' and the statement 'terminateTextSelectionMode()' under this condition have changed, the value of variables may be different in the new implementation which leads to a different return, thus the CI type is 1."
+7,<android.widget.TextView.SelectionModifierCursorController: boolean onTouchEvent(MotionEvent)>,9,10,<android.widget.TextView.SelectionModifierCursorController: boolean onTouchEvent(MotionEvent)>,<android.widget.TextView.SelectionModifierCursorController: boolean onTouchEvent(MotionEvent)>,0,"{
+    // selection and tap can move cursor from this tap position.
+    if (isTextEditable()) {
+        switch(event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                final int x = (int) event.getX();
+                final int y = (int) event.getY();
+                // Remember finger down position, to be able to start selection from there
+                mMinTouchOffset = mMaxTouchOffset = getOffset(x, y);
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+            case MotionEvent.ACTION_POINTER_UP:
+                // Only activated for devices that correctly handle multi-touch.
+                if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT)) {
+                    updateMinAndMaxOffsets(event);
+                }
+                break;
+        }
+    }
+    return false;
+}","{
+    // selection and tap can move cursor from this tap position.
+    if (isTextEditable()) {
+        switch(event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                final int x = (int) event.getX();
+                final int y = (int) event.getY();
+                // Remember finger down position, to be able to start selection from there
+                mMinTouchOffset = mMaxTouchOffset = getOffset(x, y);
+                // Double tap detection
+                long duration = SystemClock.uptimeMillis() - mPreviousTapUpTime;
+                if (duration <= ViewConfiguration.getDoubleTapTimeout()) {
+                    final int deltaX = x - mPreviousTapPositionX;
+                    final int deltaY = y - mPreviousTapPositionY;
+                    final int distanceSquared = deltaX * deltaX + deltaY * deltaY;
+                    final int doubleTapSlop = ViewConfiguration.get(getContext()).getScaledDoubleTapSlop();
+                    final int slopSquared = doubleTapSlop * doubleTapSlop;
+                    if (distanceSquared < slopSquared) {
+                        startTextSelectionMode();
+                        // Hacky: onTapUpEvent will open a context menu with cut/copy
+                        // Prevent this by hiding handles which will be revived instead.
+                        hide();
+                    }
+                }
+                mPreviousTapPositionX = x;
+                mPreviousTapPositionY = y;
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+            case MotionEvent.ACTION_POINTER_UP:
+                // Only activated for devices that correctly handle multi-touch.
+                if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT)) {
+                    updateMinAndMaxOffsets(event);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                mPreviousTapUpTime = SystemClock.uptimeMillis();
+                break;
+        }
+    }
+    return false;
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"3,4",0,"Additional statements have been introduced in the 'MotionEvent.ACTION_DOWN' case condition within the 'switch' statement. Also, a new case 'MotionEvent.ACTION_UP' was added to the 'switch' statement. Hence, the type of change is 3,4 as it includes changes in control dependency and other statements.","The added or changed statements are used to determine the type of touch event. However, these do not alter the return type or the exceptions thrown by the method as it always returns false. Hence, there are no probable Compatibility Issues, thus the type is 0."
+8,<android.app.Activity: void performResume()>,9,10,<android.app.Activity: void performResume()>,<android.app.Activity: void performResume()>,0,"{
+    performRestart();
+    mLastNonConfigurationInstance = null;
+    // First call onResume() -before- setting mResumed, so we don't
+    // send out any status bar / menu notifications the client makes.
+    mCalled = false;
+    mInstrumentation.callActivityOnResume(this);
+    if (!mCalled) {
+        throw new SuperNotCalledException(""Activity "" + mComponent.toShortString() + "" did not call through to super.onResume()"");
+    }
+    // Now really resume, and install the current status bar and menu.
+    mResumed = true;
+    mCalled = false;
+    onPostResume();
+    if (!mCalled) {
+        throw new SuperNotCalledException(""Activity "" + mComponent.toShortString() + "" did not call through to super.onPostResume()"");
+    }
+}","{
+    performRestart();
+    mLastNonConfigurationInstance = null;
+    mCalled = false;
+    // mResumed is set by the instrumentation
+    mInstrumentation.callActivityOnResume(this);
+    if (!mCalled) {
+        throw new SuperNotCalledException(""Activity "" + mComponent.toShortString() + "" did not call through to super.onResume()"");
+    }
+    // Now really resume, and install the current status bar and menu.
+    mCalled = false;
+    onPostResume();
+    if (!mCalled) {
+        throw new SuperNotCalledException(""Activity "" + mComponent.toShortString() + "" did not call through to super.onPostResume()"");
+    }
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,4,0,"The statement 'mResumed = true;' only exists in the early version and has been deleted in the late version, which leads to a class 4 change (other statement changed). ","The statement 'mResumed = true;' that has been deleted in the late version does not affect the behavior of the API. The return value and exception throws remain the same in both versions. Thus, no compatibility issue exists."
+10,<android.widget.HorizontalScrollView: boolean onTouchEvent(MotionEvent)>,9,10,<android.widget.HorizontalScrollView: boolean onTouchEvent(MotionEvent)>,<android.widget.HorizontalScrollView: boolean onTouchEvent(MotionEvent)>,0,"{
+    if (ev.getAction() == MotionEvent.ACTION_DOWN && ev.getEdgeFlags() != 0) {
+        // descendants.
+        return false;
+    }
+    if (mVelocityTracker == null) {
+        mVelocityTracker = VelocityTracker.obtain();
+    }
+    mVelocityTracker.addMovement(ev);
+    final int action = ev.getAction();
+    switch(action & MotionEvent.ACTION_MASK) {
+        case MotionEvent.ACTION_DOWN:
+            {
+                final float x = ev.getX();
+                mIsBeingDragged = true;
+                /*
+                 * If being flinged and user touches, stop the fling. isFinished
+                 * will be false if being flinged.
+                 */
+                if (!mScroller.isFinished()) {
+                    mScroller.abortAnimation();
+                }
+                // Remember where the motion event started
+                mLastMotionX = x;
+                mActivePointerId = ev.getPointerId(0);
+                break;
+            }
+        case MotionEvent.ACTION_MOVE:
+            if (mIsBeingDragged) {
+                // Scroll to follow the motion event
+                final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
+                final float x = ev.getX(activePointerIndex);
+                final int deltaX = (int) (mLastMotionX - x);
+                mLastMotionX = x;
+                final int oldX = mScrollX;
+                final int oldY = mScrollY;
+                final int range = getScrollRange();
+                if (overScrollBy(deltaX, 0, mScrollX, 0, range, 0, mOverscrollDistance, 0, true)) {
+                    // Break our velocity if we hit a scroll barrier.
+                    mVelocityTracker.clear();
+                }
+                onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+                final int overscrollMode = getOverScrollMode();
+                if (overscrollMode == OVER_SCROLL_ALWAYS || (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0)) {
+                    final int pulledToX = oldX + deltaX;
+                    if (pulledToX < 0) {
+                        mEdgeGlowLeft.onPull((float) deltaX / getWidth());
+                        if (!mEdgeGlowRight.isFinished()) {
+                            mEdgeGlowRight.onRelease();
+                        }
+                    } else if (pulledToX > range) {
+                        mEdgeGlowRight.onPull((float) deltaX / getWidth());
+                        if (!mEdgeGlowLeft.isFinished()) {
+                            mEdgeGlowLeft.onRelease();
+                        }
+                    }
+                    if (mEdgeGlowLeft != null && (!mEdgeGlowLeft.isFinished() || !mEdgeGlowRight.isFinished())) {
+                        invalidate();
+                    }
+                }
+            }
+            break;
+        case MotionEvent.ACTION_UP:
+            if (mIsBeingDragged) {
+                final VelocityTracker velocityTracker = mVelocityTracker;
+                velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                int initialVelocity = (int) velocityTracker.getXVelocity(mActivePointerId);
+                if (getChildCount() > 0) {
+                    if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
+                        fling(-initialVelocity);
+                    } else {
+                        final int right = getScrollRange();
+                        if (mScroller.springBack(mScrollX, mScrollY, 0, right, 0, 0)) {
+                            invalidate();
+                        }
+                    }
+                }
+                mActivePointerId = INVALID_POINTER;
+                mIsBeingDragged = false;
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
+                if (mEdgeGlowLeft != null) {
+                    mEdgeGlowLeft.onRelease();
+                    mEdgeGlowRight.onRelease();
+                }
+            }
+            break;
+        case MotionEvent.ACTION_CANCEL:
+            if (mIsBeingDragged && getChildCount() > 0) {
+                if (mScroller.springBack(mScrollX, mScrollY, 0, getScrollRange(), 0, 0)) {
+                    invalidate();
+                }
+                mActivePointerId = INVALID_POINTER;
+                mIsBeingDragged = false;
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
+                if (mEdgeGlowLeft != null) {
+                    mEdgeGlowLeft.onRelease();
+                    mEdgeGlowRight.onRelease();
+                }
+            }
+            break;
+        case MotionEvent.ACTION_POINTER_UP:
+            onSecondaryPointerUp(ev);
+            break;
+    }
+    return true;
+}","{
+    if (ev.getAction() == MotionEvent.ACTION_DOWN && ev.getEdgeFlags() != 0) {
+        // descendants.
+        return false;
+    }
+    if (mVelocityTracker == null) {
+        mVelocityTracker = VelocityTracker.obtain();
+    }
+    mVelocityTracker.addMovement(ev);
+    final int action = ev.getAction();
+    switch(action & MotionEvent.ACTION_MASK) {
+        case MotionEvent.ACTION_DOWN:
+            {
+                mIsBeingDragged = getChildCount() != 0;
+                if (!mIsBeingDragged) {
+                    return false;
+                }
+                /*
+                 * If being flinged and user touches, stop the fling. isFinished
+                 * will be false if being flinged.
+                 */
+                if (!mScroller.isFinished()) {
+                    mScroller.abortAnimation();
+                }
+                // Remember where the motion event started
+                mLastMotionX = ev.getX();
+                mActivePointerId = ev.getPointerId(0);
+                break;
+            }
+        case MotionEvent.ACTION_MOVE:
+            if (mIsBeingDragged) {
+                // Scroll to follow the motion event
+                final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
+                final float x = ev.getX(activePointerIndex);
+                final int deltaX = (int) (mLastMotionX - x);
+                mLastMotionX = x;
+                final int oldX = mScrollX;
+                final int oldY = mScrollY;
+                final int range = getScrollRange();
+                if (overScrollBy(deltaX, 0, mScrollX, 0, range, 0, mOverscrollDistance, 0, true)) {
+                    // Break our velocity if we hit a scroll barrier.
+                    mVelocityTracker.clear();
+                }
+                onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+                final int overscrollMode = getOverScrollMode();
+                if (overscrollMode == OVER_SCROLL_ALWAYS || (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0)) {
+                    final int pulledToX = oldX + deltaX;
+                    if (pulledToX < 0) {
+                        mEdgeGlowLeft.onPull((float) deltaX / getWidth());
+                        if (!mEdgeGlowRight.isFinished()) {
+                            mEdgeGlowRight.onRelease();
+                        }
+                    } else if (pulledToX > range) {
+                        mEdgeGlowRight.onPull((float) deltaX / getWidth());
+                        if (!mEdgeGlowLeft.isFinished()) {
+                            mEdgeGlowLeft.onRelease();
+                        }
+                    }
+                    if (mEdgeGlowLeft != null && (!mEdgeGlowLeft.isFinished() || !mEdgeGlowRight.isFinished())) {
+                        invalidate();
+                    }
+                }
+            }
+            break;
+        case MotionEvent.ACTION_UP:
+            if (mIsBeingDragged) {
+                final VelocityTracker velocityTracker = mVelocityTracker;
+                velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                int initialVelocity = (int) velocityTracker.getXVelocity(mActivePointerId);
+                if (getChildCount() > 0) {
+                    if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
+                        fling(-initialVelocity);
+                    } else {
+                        final int right = getScrollRange();
+                        if (mScroller.springBack(mScrollX, mScrollY, 0, right, 0, 0)) {
+                            invalidate();
+                        }
+                    }
+                }
+                mActivePointerId = INVALID_POINTER;
+                mIsBeingDragged = false;
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
+                if (mEdgeGlowLeft != null) {
+                    mEdgeGlowLeft.onRelease();
+                    mEdgeGlowRight.onRelease();
+                }
+            }
+            break;
+        case MotionEvent.ACTION_CANCEL:
+            if (mIsBeingDragged && getChildCount() > 0) {
+                if (mScroller.springBack(mScrollX, mScrollY, 0, getScrollRange(), 0, 0)) {
+                    invalidate();
+                }
+                mActivePointerId = INVALID_POINTER;
+                mIsBeingDragged = false;
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
+                if (mEdgeGlowLeft != null) {
+                    mEdgeGlowLeft.onRelease();
+                    mEdgeGlowRight.onRelease();
+                }
+            }
+            break;
+        case MotionEvent.ACTION_POINTER_UP:
+            onSecondaryPointerUp(ev);
+            break;
+    }
+    return true;
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,"1,3",1,"In the early version, mIsBeingDragged is directly set to true when MotionEvent.ACTION_DOWN occurs, while in the later version, it is set as the result of condition (getChildCount() != 0), and a return statement is added when mIsBeingDragged is false. Hence, both the return and control statement have been changed and fall into change type 1,3.","Due to the changed condition of MotionEvent.ACTION_DOWN occurring, it's possible for API to return different values in the two versions. Consequently, the compatibility issue falls into type 1."
+11,<android.view.ViewGroup: boolean gatherTransparentRegion(Region)>,9,10,<android.view.ViewGroup: boolean gatherTransparentRegion(Region)>,<android.view.ViewGroup: boolean gatherTransparentRegion(Region)>,0,"{
+    // If no transparent regions requested, we are always opaque.
+    final boolean meOpaque = (mPrivateFlags & View.REQUEST_TRANSPARENT_REGIONS) == 0;
+    if (meOpaque && region == null) {
+        // The caller doesn't care about the region, so stop now.
+        return true;
+    }
+    super.gatherTransparentRegion(region);
+    final View[] children = mChildren;
+    final int count = mChildrenCount;
+    boolean noneOfTheChildrenAreTransparent = true;
+    for (int i = 0; i < count; i++) {
+        final View child = children[i];
+        if ((child.mViewFlags & VISIBILITY_MASK) != GONE || child.getAnimation() != null) {
+            if (!child.gatherTransparentRegion(region)) {
+                noneOfTheChildrenAreTransparent = false;
+            }
+        }
+    }
+    return meOpaque || noneOfTheChildrenAreTransparent;
+}","{
+    // If no transparent regions requested, we are always opaque.
+    final boolean meOpaque = (mPrivateFlags & View.REQUEST_TRANSPARENT_REGIONS) == 0;
+    if (meOpaque && region == null) {
+        // The caller doesn't care about the region, so stop now.
+        return true;
+    }
+    super.gatherTransparentRegion(region);
+    final View[] children = mChildren;
+    final int count = mChildrenCount;
+    boolean noneOfTheChildrenAreTransparent = true;
+    for (int i = 0; i < count; i++) {
+        final View child = children[i];
+        if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null) {
+            if (!child.gatherTransparentRegion(region)) {
+                noneOfTheChildrenAreTransparent = false;
+            }
+        }
+    }
+    return meOpaque || noneOfTheChildrenAreTransparent;
+}",1,"/**
+ * {@inheritDoc}
+ */
+","/**
+ * {@inheritDoc}
+ */
+",-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,3,1,"The condition statement in the for loop has changed from comparing against 'GONE' to comparing against 'VISIBLE', so the code change type is 3.","As the condition statement in the for loop has changed, the operation within the for loop can occur under different conditions. This could potentially influence the return value of the method. Thus, the CI type is 1."
+12,<android.widget.TextView: boolean onPreDraw()>,9,10,<android.widget.TextView: boolean onPreDraw()>,<android.widget.TextView: boolean onPreDraw()>,0,"{
+    if (mPreDrawState != PREDRAW_PENDING) {
+        return true;
+    }
+    if (mLayout == null) {
+        assumeLayout();
+    }
+    boolean changed = false;
+    SelectionModifierCursorController selectionController = null;
+    if (mSelectionModifierCursorController != null) {
+        selectionController = (SelectionModifierCursorController) mSelectionModifierCursorController;
+    }
+    if (mMovement != null) {
+        /* This code also provides auto-scrolling when a cursor is moved using a
+             * CursorController (insertion point or selection limits).
+             * For selection, ensure start or end is visible depending on controller's state.
+             */
+        int curs = getSelectionEnd();
+        if (selectionController != null && selectionController.isSelectionStartDragged()) {
+            curs = getSelectionStart();
+        }
+        /*
+             * TODO: This should really only keep the end in view if
+             * it already was before the text changed.  I'm not sure
+             * of a good way to tell from here if it was.
+             */
+        if (curs < 0 && (mGravity & Gravity.VERTICAL_GRAVITY_MASK) == Gravity.BOTTOM) {
+            curs = mText.length();
+        }
+        if (curs >= 0) {
+            changed = bringPointIntoView(curs);
+        }
+    } else {
+        changed = bringTextIntoView();
+    }
+    // startTextSelectionMode here. TODO
+    if (this instanceof ExtractEditText && selectionController != null && hasSelection()) {
+        startTextSelectionMode();
+    }
+    mPreDrawState = PREDRAW_DONE;
+    return !changed;
+}","{
+    if (mPreDrawState != PREDRAW_PENDING) {
+        return true;
+    }
+    if (mLayout == null) {
+        assumeLayout();
+    }
+    boolean changed = false;
+    SelectionModifierCursorController selectionController = null;
+    if (mSelectionModifierCursorController != null) {
+        selectionController = (SelectionModifierCursorController) mSelectionModifierCursorController;
+    }
+    if (mMovement != null) {
+        /* This code also provides auto-scrolling when a cursor is moved using a
+             * CursorController (insertion point or selection limits).
+             * For selection, ensure start or end is visible depending on controller's state.
+             */
+        int curs = getSelectionEnd();
+        if (selectionController != null && selectionController.isSelectionStartDragged()) {
+            curs = getSelectionStart();
+        }
+        /*
+             * TODO: This should really only keep the end in view if
+             * it already was before the text changed.  I'm not sure
+             * of a good way to tell from here if it was.
+             */
+        if (curs < 0 && (mGravity & Gravity.VERTICAL_GRAVITY_MASK) == Gravity.BOTTOM) {
+            curs = mText.length();
+        }
+        if (curs >= 0) {
+            changed = bringPointIntoView(curs);
+        }
+    } else {
+        changed = bringTextIntoView();
+    }
+    // startTextSelectionMode here. TODO
+    if (mCreatedWithASelection || (this instanceof ExtractEditText && selectionController != null && hasSelection())) {
+        startTextSelectionMode();
+        mCreatedWithASelection = false;
+    }
+    mPreDrawState = PREDRAW_DONE;
+    return !changed;
+}",1,"/**
+ * {@inheritDoc}
+ */
+","/**
+ * {@inheritDoc}
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"3,1",1,"The condition statement has changed. The new condition 'mCreatedWithASelection' is added in the if statement, so the code change type is 3. Additionally, the statement 'mCreatedWithASelection = false;' is added, which will change variable 'mCreatedWithASelection', so the code change type is also 1.","With the addition of the 'mCreatedWithASelection' condition and the new return statement 'mCreatedWithASelection = false', the return value of the API may potentially be different. Therefore, the CI type is 1."
+13,"<android.net.MobileDataStateTracker.MobileDataStateReceiver: void onReceive(Context,Intent)>",9,10,"<android.net.MobileDataStateTracker.MobileDataStateReceiver: void onReceive(Context,Intent)>","<android.net.MobileDataStateTracker.MobileDataStateReceiver: void onReceive(Context,Intent)>",0,"{
+    synchronized (this) {
+        if (intent.getAction().equals(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
+            Phone.DataState state = getMobileDataState(intent);
+            String reason = intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
+            String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
+            String apnTypeList = intent.getStringExtra(Phone.DATA_APN_TYPES_KEY);
+            mApnName = apnName;
+            boolean unavailable = intent.getBooleanExtra(Phone.NETWORK_UNAVAILABLE_KEY, false);
+            // set this regardless of the apnTypeList.  It's all the same radio/network
+            // underneath
+            mNetworkInfo.setIsAvailable(!unavailable);
+            if (isApnTypeIncluded(apnTypeList)) {
+                if (mEnabled == false) {
+                    // notifications
+                    if (state == Phone.DataState.CONNECTED) {
+                        if (DBG)
+                            Log.d(TAG, ""replacing old mInterfaceName ("" + mInterfaceName + "") with "" + intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY) + "" for "" + mApnType);
+                        mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
+                    }
+                    return;
+                }
+            } else {
+                return;
+            }
+            if (DBG)
+                Log.d(TAG, mApnType + "" Received state= "" + state + "", old= "" + mMobileDataState + "", reason= "" + (reason == null ? ""(unspecified)"" : reason) + "", apnTypeList= "" + apnTypeList);
+            if (mMobileDataState != state) {
+                mMobileDataState = state;
+                switch(state) {
+                    case DISCONNECTED:
+                        if (isTeardownRequested()) {
+                            mEnabled = false;
+                            setTeardownRequested(false);
+                        }
+                        setDetailedState(DetailedState.DISCONNECTED, reason, apnName);
+                        boolean doReset = true;
+                        if (mIsDefaultOrHipri == true) {
+                            // both default and hipri must go down before we reset
+                            int typeToCheck = (Phone.APN_TYPE_DEFAULT.equals(mApnType) ? ConnectivityManager.TYPE_MOBILE_HIPRI : ConnectivityManager.TYPE_MOBILE);
+                            if (mConnectivityManager == null) {
+                                mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                            }
+                            if (mConnectivityManager != null) {
+                                NetworkInfo info = mConnectivityManager.getNetworkInfo(typeToCheck);
+                                if (info != null && info.isConnected() == true) {
+                                    doReset = false;
+                                }
+                            }
+                        }
+                        if (doReset && mInterfaceName != null) {
+                            NetworkUtils.resetConnections(mInterfaceName);
+                        }
+                        // mDefaultGatewayAddr = 0;
+                        break;
+                    case CONNECTING:
+                        setDetailedState(DetailedState.CONNECTING, reason, apnName);
+                        break;
+                    case SUSPENDED:
+                        setDetailedState(DetailedState.SUSPENDED, reason, apnName);
+                        break;
+                    case CONNECTED:
+                        mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
+                        if (mInterfaceName == null) {
+                            Log.d(TAG, ""CONNECTED event did not supply interface name."");
+                        }
+                        mDefaultGatewayAddr = intent.getIntExtra(Phone.DATA_GATEWAY_KEY, 0);
+                        setDetailedState(DetailedState.CONNECTED, reason, apnName);
+                        break;
+                }
+            }
+        } else if (intent.getAction().equals(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED)) {
+            mEnabled = false;
+            String reason = intent.getStringExtra(Phone.FAILURE_REASON_KEY);
+            String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
+            if (DBG)
+                Log.d(TAG, ""Received "" + intent.getAction() + "" broadcast"" + reason == null ? """" : ""("" + reason + "")"");
+            setDetailedState(DetailedState.FAILED, reason, apnName);
+        }
+        TelephonyManager tm = TelephonyManager.getDefault();
+        setRoamingStatus(tm.isNetworkRoaming());
+        setSubtype(tm.getNetworkType(), tm.getNetworkTypeName());
+    }
+}","{
+    synchronized (this) {
+        // update state and roaming before we set the state - only state changes are
+        // noticed
+        TelephonyManager tm = TelephonyManager.getDefault();
+        setRoamingStatus(tm.isNetworkRoaming());
+        setSubtype(tm.getNetworkType(), tm.getNetworkTypeName());
+        if (intent.getAction().equals(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
+            Phone.DataState state = getMobileDataState(intent);
+            String reason = intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
+            String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
+            String apnTypeList = intent.getStringExtra(Phone.DATA_APN_TYPES_KEY);
+            mApnName = apnName;
+            boolean unavailable = intent.getBooleanExtra(Phone.NETWORK_UNAVAILABLE_KEY, false);
+            // set this regardless of the apnTypeList.  It's all the same radio/network
+            // underneath
+            mNetworkInfo.setIsAvailable(!unavailable);
+            if (isApnTypeIncluded(apnTypeList)) {
+                if (mEnabled == false) {
+                    // notifications
+                    if (state == Phone.DataState.CONNECTED) {
+                        if (DBG)
+                            Log.d(TAG, ""replacing old mInterfaceName ("" + mInterfaceName + "") with "" + intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY) + "" for "" + mApnType);
+                        mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
+                    }
+                    return;
+                }
+            } else {
+                return;
+            }
+            if (DBG)
+                Log.d(TAG, mApnType + "" Received state= "" + state + "", old= "" + mMobileDataState + "", reason= "" + (reason == null ? ""(unspecified)"" : reason) + "", apnTypeList= "" + apnTypeList);
+            if (mMobileDataState != state) {
+                mMobileDataState = state;
+                switch(state) {
+                    case DISCONNECTED:
+                        if (isTeardownRequested()) {
+                            mEnabled = false;
+                            setTeardownRequested(false);
+                        }
+                        setDetailedState(DetailedState.DISCONNECTED, reason, apnName);
+                        boolean doReset = true;
+                        if (mIsDefaultOrHipri == true) {
+                            // both default and hipri must go down before we reset
+                            int typeToCheck = (Phone.APN_TYPE_DEFAULT.equals(mApnType) ? ConnectivityManager.TYPE_MOBILE_HIPRI : ConnectivityManager.TYPE_MOBILE);
+                            if (mConnectivityManager == null) {
+                                mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                            }
+                            if (mConnectivityManager != null) {
+                                NetworkInfo info = mConnectivityManager.getNetworkInfo(typeToCheck);
+                                if (info != null && info.isConnected() == true) {
+                                    doReset = false;
+                                }
+                            }
+                        }
+                        if (doReset && mInterfaceName != null) {
+                            NetworkUtils.resetConnections(mInterfaceName);
+                        }
+                        // mDefaultGatewayAddr = 0;
+                        break;
+                    case CONNECTING:
+                        setDetailedState(DetailedState.CONNECTING, reason, apnName);
+                        break;
+                    case SUSPENDED:
+                        setDetailedState(DetailedState.SUSPENDED, reason, apnName);
+                        break;
+                    case CONNECTED:
+                        mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
+                        if (mInterfaceName == null) {
+                            Log.d(TAG, ""CONNECTED event did not supply interface name."");
+                        }
+                        mDefaultGatewayAddr = intent.getIntExtra(Phone.DATA_GATEWAY_KEY, 0);
+                        setDetailedState(DetailedState.CONNECTED, reason, apnName);
+                        break;
+                }
+            }
+        } else if (intent.getAction().equals(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED)) {
+            mEnabled = false;
+            String reason = intent.getStringExtra(Phone.FAILURE_REASON_KEY);
+            String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
+            if (DBG)
+                Log.d(TAG, ""Received "" + intent.getAction() + "" broadcast"" + reason == null ? """" : ""("" + reason + "")"");
+            setDetailedState(DetailedState.FAILED, reason, apnName);
+        }
+    }
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,3,0,"In the code, the positioning of the two lines of code where the TelephonyManager object ""tm"" is created has changed. They've been moved to the top of the synchronized block in the later version from the bottom of this block in the earlier version. This change type is 3 - control dependency changed.","This change doesn't affect the behaviour of this method, it doesn't change what this method returns or what exceptions it throws. So, there's no compatibility issue for this change, and the CI type is 0."
+16,<android.widget.TextView: boolean onTouchEvent(MotionEvent)>,9,10,<android.widget.TextView: boolean onTouchEvent(MotionEvent)>,<android.widget.TextView: boolean onTouchEvent(MotionEvent)>,0,"{
+    final int action = event.getActionMasked();
+    if (action == MotionEvent.ACTION_DOWN) {
+        if (hasInsertionController()) {
+            getInsertionController().onTouchEvent(event);
+        }
+        if (hasSelectionController()) {
+            getSelectionController().onTouchEvent(event);
+        }
+        // Reset this state; it will be re-set if super.onTouchEvent
+        // causes focus to move to the view.
+        mTouchFocusSelected = false;
+        mScrolled = false;
+    }
+    final boolean superResult = super.onTouchEvent(event);
+    /*
+         * Don't handle the release after a long press, because it will
+         * move the selection away from whatever the menu action was
+         * trying to affect.
+         */
+    if (mEatTouchRelease && action == MotionEvent.ACTION_UP) {
+        mEatTouchRelease = false;
+        return superResult;
+    }
+    if ((mMovement != null || onCheckIsTextEditor()) && mText instanceof Spannable && mLayout != null) {
+        if (hasInsertionController()) {
+            getInsertionController().onTouchEvent(event);
+        }
+        if (hasSelectionController()) {
+            getSelectionController().onTouchEvent(event);
+        }
+        boolean handled = false;
+        // Save previous selection, in case this event is used to show the IME.
+        int oldSelStart = getSelectionStart();
+        int oldSelEnd = getSelectionEnd();
+        final int oldScrollX = mScrollX;
+        final int oldScrollY = mScrollY;
+        if (mMovement != null) {
+            handled |= mMovement.onTouchEvent(this, (Spannable) mText, event);
+        }
+        if (isTextEditable()) {
+            if (mScrollX != oldScrollX || mScrollY != oldScrollY) {
+                // Hide insertion anchor while scrolling. Leave selection.
+                hideInsertionPointCursorController();
+                if (mSelectionModifierCursorController != null && mSelectionModifierCursorController.isShowing()) {
+                    mSelectionModifierCursorController.updatePosition();
+                }
+            }
+            if (action == MotionEvent.ACTION_UP && isFocused() && !mScrolled) {
+                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                CommitSelectionReceiver csr = null;
+                if (getSelectionStart() != oldSelStart || getSelectionEnd() != oldSelEnd || didTouchFocusSelect()) {
+                    csr = new CommitSelectionReceiver(oldSelStart, oldSelEnd);
+                }
+                handled |= imm.showSoftInput(this, 0, csr) && (csr != null);
+                // Cannot be done by CommitSelectionReceiver, which might not always be called,
+                // for instance when dealing with an ExtractEditText.
+                onTapUpEvent(oldSelStart, oldSelEnd);
+            }
+        }
+        if (handled) {
+            return true;
+        }
+    }
+    return superResult;
+}","{
+    final int action = event.getActionMasked();
+    if (hasInsertionController()) {
+        getInsertionController().onTouchEvent(event);
+    }
+    if (hasSelectionController()) {
+        getSelectionController().onTouchEvent(event);
+    }
+    if (action == MotionEvent.ACTION_DOWN) {
+        // Reset this state; it will be re-set if super.onTouchEvent
+        // causes focus to move to the view.
+        mTouchFocusSelected = false;
+        mScrolled = false;
+    }
+    final boolean superResult = super.onTouchEvent(event);
+    /*
+         * Don't handle the release after a long press, because it will
+         * move the selection away from whatever the menu action was
+         * trying to affect.
+         */
+    if (mEatTouchRelease && action == MotionEvent.ACTION_UP) {
+        mEatTouchRelease = false;
+        return superResult;
+    }
+    if ((mMovement != null || onCheckIsTextEditor()) && mText instanceof Spannable && mLayout != null) {
+        boolean handled = false;
+        // Save previous selection, in case this event is used to show the IME.
+        int oldSelStart = getSelectionStart();
+        int oldSelEnd = getSelectionEnd();
+        final int oldScrollX = mScrollX;
+        final int oldScrollY = mScrollY;
+        if (mMovement != null) {
+            handled |= mMovement.onTouchEvent(this, (Spannable) mText, event);
+        }
+        if (isTextEditable()) {
+            if (mScrollX != oldScrollX || mScrollY != oldScrollY) {
+                // Hide insertion anchor while scrolling. Leave selection.
+                hideInsertionPointCursorController();
+                if (mSelectionModifierCursorController != null && mSelectionModifierCursorController.isShowing()) {
+                    mSelectionModifierCursorController.updatePosition();
+                }
+            }
+            if (action == MotionEvent.ACTION_UP && isFocused() && !mScrolled) {
+                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                CommitSelectionReceiver csr = null;
+                if (getSelectionStart() != oldSelStart || getSelectionEnd() != oldSelEnd || didTouchFocusSelect()) {
+                    csr = new CommitSelectionReceiver(oldSelStart, oldSelEnd);
+                }
+                handled |= imm.showSoftInput(this, 0, csr) && (csr != null);
+                // Cannot be done by CommitSelectionReceiver, which might not always be called,
+                // for instance when dealing with an ExtractEditText.
+                onTapUpEvent(oldSelStart, oldSelEnd);
+            }
+        }
+        if (handled) {
+            return true;
+        }
+    }
+    return superResult;
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,3,0,"The control statements (IF conditions) have been reordered, but none of the statements within those conditions have changed, so the code change type is 3.","The behaviour of the API hasn't been changed since the reordering of IF conditions doesn't affect the final outcome, so no Compatibility Issue exists, and the CI type is 0."
+18,"<android.app.ContextImpl: SharedPreferences getSharedPreferences(String,int)>",9,10,"<android.app.ContextImpl: SharedPreferences getSharedPreferences(String,int)>","<android.app.ContextImpl: SharedPreferences getSharedPreferences(String,int)>",0,"{
+    SharedPreferencesImpl sp;
+    File prefsFile;
+    boolean needInitialLoad = false;
+    synchronized (sSharedPrefs) {
+        sp = sSharedPrefs.get(name);
+        if (sp != null && !sp.hasFileChangedUnexpectedly()) {
+            return sp;
+        }
+        prefsFile = getSharedPrefsFile(name);
+        if (sp == null) {
+            sp = new SharedPreferencesImpl(prefsFile, mode, null);
+            sSharedPrefs.put(name, sp);
+            needInitialLoad = true;
+        }
+    }
+    synchronized (sp) {
+        if (needInitialLoad && sp.isLoaded()) {
+            // lost the race to load; another thread handled it
+            return sp;
+        }
+        File backup = makeBackupFile(prefsFile);
+        if (backup.exists()) {
+            prefsFile.delete();
+            backup.renameTo(prefsFile);
+        }
+        // Debugging
+        if (prefsFile.exists() && !prefsFile.canRead()) {
+            Log.w(TAG, ""Attempt to read preferences file "" + prefsFile + "" without permission"");
+        }
+        Map map = null;
+        if (prefsFile.exists() && prefsFile.canRead()) {
+            try {
+                FileInputStream str = new FileInputStream(prefsFile);
+                map = XmlUtils.readMapXml(str);
+                str.close();
+            } catch (org.xmlpull.v1.XmlPullParserException e) {
+                Log.w(TAG, ""getSharedPreferences"", e);
+            } catch (FileNotFoundException e) {
+                Log.w(TAG, ""getSharedPreferences"", e);
+            } catch (IOException e) {
+                Log.w(TAG, ""getSharedPreferences"", e);
+            }
+        }
+        sp.replace(map);
+    }
+    return sp;
+}","{
+    SharedPreferencesImpl sp;
+    File prefsFile;
+    boolean needInitialLoad = false;
+    synchronized (sSharedPrefs) {
+        sp = sSharedPrefs.get(name);
+        if (sp != null && !sp.hasFileChangedUnexpectedly()) {
+            return sp;
+        }
+        prefsFile = getSharedPrefsFile(name);
+        if (sp == null) {
+            sp = new SharedPreferencesImpl(prefsFile, mode, null);
+            sSharedPrefs.put(name, sp);
+            needInitialLoad = true;
+        }
+    }
+    synchronized (sp) {
+        if (needInitialLoad && sp.isLoaded()) {
+            // lost the race to load; another thread handled it
+            return sp;
+        }
+        File backup = makeBackupFile(prefsFile);
+        if (backup.exists()) {
+            prefsFile.delete();
+            backup.renameTo(prefsFile);
+        }
+        // Debugging
+        if (prefsFile.exists() && !prefsFile.canRead()) {
+            Log.w(TAG, ""Attempt to read preferences file "" + prefsFile + "" without permission"");
+        }
+        Map map = null;
+        FileStatus stat = new FileStatus();
+        if (FileUtils.getFileStatus(prefsFile.getPath(), stat) && prefsFile.canRead()) {
+            try {
+                FileInputStream str = new FileInputStream(prefsFile);
+                map = XmlUtils.readMapXml(str);
+                str.close();
+            } catch (org.xmlpull.v1.XmlPullParserException e) {
+                Log.w(TAG, ""getSharedPreferences"", e);
+            } catch (FileNotFoundException e) {
+                Log.w(TAG, ""getSharedPreferences"", e);
+            } catch (IOException e) {
+                Log.w(TAG, ""getSharedPreferences"", e);
+            }
+        }
+        sp.replace(map, stat);
+    }
+    return sp;
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,"1,4,5",1,"The change in the code is threefold. Firstly, there is an additional object initialization (FileStatus stat = new FileStatus()), this counts as an other statement changed - hence code change type 4. ",
+19,<android.widget.TextView: void onCreateContextMenu(ContextMenu)>,9,10,<android.widget.TextView: void onCreateContextMenu(ContextMenu)>,<android.widget.TextView: void onCreateContextMenu(ContextMenu)>,0,"{
+    super.onCreateContextMenu(menu);
+    boolean added = false;
+    mContextMenuTriggeredByKey = mDPadCenterIsDown || mEnterKeyIsDown;
+    // Problem with context menu on long press: the menu appears while the key in down and when
+    // the key is released, the view does not receive the key_up event. This ensures that the
+    // state is reset whenever the context menu action is displayed.
+    // mContextMenuTriggeredByKey saved that state so that it is available in
+    // onTextContextMenuItem. We cannot simply clear these flags in onTextContextMenuItem since
+    // it may not be called (if the user/ discards the context menu with the back key).
+    mDPadCenterIsDown = mEnterKeyIsDown = false;
+    if (mIsInTextSelectionMode) {
+        MenuHandler handler = new MenuHandler();
+        if (canCut()) {
+            menu.add(0, ID_CUT, 0, com.android.internal.R.string.cut).setOnMenuItemClickListener(handler).setAlphabeticShortcut('x');
+            added = true;
+        }
+        if (canCopy()) {
+            menu.add(0, ID_COPY, 0, com.android.internal.R.string.copy).setOnMenuItemClickListener(handler).setAlphabeticShortcut('c');
+            added = true;
+        }
+        if (canPaste()) {
+            menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).setOnMenuItemClickListener(handler).setAlphabeticShortcut('v');
+            added = true;
+        }
+    } else {
+        MenuHandler handler = new MenuHandler();
+        if (canSelectText()) {
+            if (!hasPasswordTransformationMethod()) {
+                // selectCurrentWord is not available on a password field and would return an
+                // arbitrary 10-charater selection around pressed position. Discard it.
+                // SelectAll is still useful to be able to clear the field using the delete key.
+                menu.add(0, ID_START_SELECTING_TEXT, 0, com.android.internal.R.string.selectText).setOnMenuItemClickListener(handler);
+            }
+            menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).setOnMenuItemClickListener(handler).setAlphabeticShortcut('a');
+            added = true;
+        }
+        if (mText instanceof Spanned) {
+            int selStart = getSelectionStart();
+            int selEnd = getSelectionEnd();
+            int min = Math.min(selStart, selEnd);
+            int max = Math.max(selStart, selEnd);
+            URLSpan[] urls = ((Spanned) mText).getSpans(min, max, URLSpan.class);
+            if (urls.length == 1) {
+                menu.add(0, ID_COPY_URL, 0, com.android.internal.R.string.copyUrl).setOnMenuItemClickListener(handler);
+                added = true;
+            }
+        }
+        if (canPaste()) {
+            menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).setOnMenuItemClickListener(handler).setAlphabeticShortcut('v');
+            added = true;
+        }
+        if (isInputMethodTarget()) {
+            menu.add(1, ID_SWITCH_INPUT_METHOD, 0, com.android.internal.R.string.inputMethod).setOnMenuItemClickListener(handler);
+            added = true;
+        }
+        String word = getWordForDictionary();
+        if (word != null) {
+            menu.add(1, ID_ADD_TO_DICTIONARY, 0, getContext().getString(com.android.internal.R.string.addToDictionary, word)).setOnMenuItemClickListener(handler);
+            added = true;
+        }
+    }
+    if (added) {
+        menu.setHeaderTitle(com.android.internal.R.string.editTextMenuTitle);
+    }
+}","{
+    super.onCreateContextMenu(menu);
+    boolean added = false;
+    mContextMenuTriggeredByKey = mDPadCenterIsDown || mEnterKeyIsDown;
+    // Problem with context menu on long press: the menu appears while the key in down and when
+    // the key is released, the view does not receive the key_up event. This ensures that the
+    // state is reset whenever the context menu action is displayed.
+    // mContextMenuTriggeredByKey saved that state so that it is available in
+    // onTextContextMenuItem. We cannot simply clear these flags in onTextContextMenuItem since
+    // it may not be called (if the user/ discards the context menu with the back key).
+    mDPadCenterIsDown = mEnterKeyIsDown = false;
+    if (mIsInTextSelectionMode) {
+        MenuHandler handler = new MenuHandler();
+        if (canCut()) {
+            menu.add(0, ID_CUT, 0, com.android.internal.R.string.cut).setOnMenuItemClickListener(handler).setAlphabeticShortcut('x');
+            added = true;
+        }
+        if (canCopy()) {
+            menu.add(0, ID_COPY, 0, com.android.internal.R.string.copy).setOnMenuItemClickListener(handler).setAlphabeticShortcut('c');
+            added = true;
+        }
+        if (canPaste()) {
+            menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).setOnMenuItemClickListener(handler).setAlphabeticShortcut('v');
+            added = true;
+        }
+    } else {
+        MenuHandler handler = new MenuHandler();
+        if (canSelectText()) {
+            if (!hasPasswordTransformationMethod()) {
+                // selectCurrentWord is not available on a password field and would return an
+                // arbitrary 10-charater selection around pressed position. Discard it.
+                // SelectAll is still useful to be able to clear the field using the delete key.
+                menu.add(0, ID_START_SELECTING_TEXT, 0, com.android.internal.R.string.selectText).setOnMenuItemClickListener(handler);
+            }
+            menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).setOnMenuItemClickListener(handler).setAlphabeticShortcut('a');
+            added = true;
+        }
+        if (mText instanceof Spanned) {
+            int selStart = getSelectionStart();
+            int selEnd = getSelectionEnd();
+            int min = Math.min(selStart, selEnd);
+            int max = Math.max(selStart, selEnd);
+            URLSpan[] urls = ((Spanned) mText).getSpans(min, max, URLSpan.class);
+            if (urls.length == 1) {
+                menu.add(0, ID_COPY_URL, 0, com.android.internal.R.string.copyUrl).setOnMenuItemClickListener(handler);
+                added = true;
+            }
+        }
+        if (canPaste()) {
+            menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).setOnMenuItemClickListener(handler).setAlphabeticShortcut('v');
+            added = true;
+        }
+        if (isInputMethodTarget()) {
+            menu.add(1, ID_SWITCH_INPUT_METHOD, 0, com.android.internal.R.string.inputMethod).setOnMenuItemClickListener(handler);
+            added = true;
+        }
+        String word = getWordForDictionary();
+        if (word != null) {
+            menu.add(1, ID_ADD_TO_DICTIONARY, 0, getContext().getString(com.android.internal.R.string.addToDictionary, word)).setOnMenuItemClickListener(handler);
+            added = true;
+        }
+    }
+    if (added) {
+        hideControllers();
+        menu.setHeaderTitle(com.android.internal.R.string.editTextMenuTitle);
+    }
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,4,0,"There is only an extra method call (hideControllers()) introduced in the late version API, so the code change type is 4.","The introduced method call (hideControllers()) is not likely to lead to different return values or exceptions, therefore no compatibility issue exists, so CI type is 0."
+21,<android.app.Activity: void performStop()>,9,10,<android.app.Activity: void performStop()>,<android.app.Activity: void performStop()>,0,"{
+    if (!mStopped) {
+        if (mWindow != null) {
+            mWindow.closeAllPanels();
+        }
+        mCalled = false;
+        mInstrumentation.callActivityOnStop(this);
+        if (!mCalled) {
+            throw new SuperNotCalledException(""Activity "" + mComponent.toShortString() + "" did not call through to super.onStop()"");
+        }
+        synchronized (mManagedCursors) {
+            final int N = mManagedCursors.size();
+            for (int i = 0; i < N; i++) {
+                ManagedCursor mc = mManagedCursors.get(i);
+                if (!mc.mReleased) {
+                    mc.mCursor.deactivate();
+                    mc.mReleased = true;
+                }
+            }
+        }
+        mStopped = true;
+    }
+    mResumed = false;
+}","{
+    if (!mStopped) {
+        if (mWindow != null) {
+            mWindow.closeAllPanels();
+        }
+        mCalled = false;
+        mInstrumentation.callActivityOnStop(this);
+        if (!mCalled) {
+            throw new SuperNotCalledException(""Activity "" + mComponent.toShortString() + "" did not call through to super.onStop()"");
+        }
+        synchronized (mManagedCursors) {
+            final int N = mManagedCursors.size();
+            for (int i = 0; i < N; i++) {
+                ManagedCursor mc = mManagedCursors.get(i);
+                if (!mc.mReleased) {
+                    mc.mCursor.deactivate();
+                    mc.mReleased = true;
+                }
+            }
+        }
+        mStopped = true;
+    }
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,0,0,There is no change in the implementation of this API between the two versions.,"Since there is no code change in the API, no compatibility issue exists."
+22,<android.widget.ScrollView: boolean onTouchEvent(MotionEvent)>,9,10,<android.widget.ScrollView: boolean onTouchEvent(MotionEvent)>,<android.widget.ScrollView: boolean onTouchEvent(MotionEvent)>,0,"{
+    if (ev.getAction() == MotionEvent.ACTION_DOWN && ev.getEdgeFlags() != 0) {
+        // descendants.
+        return false;
+    }
+    if (mVelocityTracker == null) {
+        mVelocityTracker = VelocityTracker.obtain();
+    }
+    mVelocityTracker.addMovement(ev);
+    final int action = ev.getAction();
+    switch(action & MotionEvent.ACTION_MASK) {
+        case MotionEvent.ACTION_DOWN:
+            {
+                final float y = ev.getY();
+                mIsBeingDragged = true;
+                /*
+                 * If being flinged and user touches, stop the fling. isFinished
+                 * will be false if being flinged.
+                 */
+                if (!mScroller.isFinished()) {
+                    mScroller.abortAnimation();
+                }
+                // Remember where the motion event started
+                mLastMotionY = y;
+                mActivePointerId = ev.getPointerId(0);
+                break;
+            }
+        case MotionEvent.ACTION_MOVE:
+            if (mIsBeingDragged) {
+                // Scroll to follow the motion event
+                final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
+                final float y = ev.getY(activePointerIndex);
+                final int deltaY = (int) (mLastMotionY - y);
+                mLastMotionY = y;
+                final int oldX = mScrollX;
+                final int oldY = mScrollY;
+                final int range = getScrollRange();
+                if (overScrollBy(0, deltaY, 0, mScrollY, 0, range, 0, mOverscrollDistance, true)) {
+                    // Break our velocity if we hit a scroll barrier.
+                    mVelocityTracker.clear();
+                }
+                onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+                final int overscrollMode = getOverScrollMode();
+                if (overscrollMode == OVER_SCROLL_ALWAYS || (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0)) {
+                    final int pulledToY = oldY + deltaY;
+                    if (pulledToY < 0) {
+                        mEdgeGlowTop.onPull((float) deltaY / getHeight());
+                        if (!mEdgeGlowBottom.isFinished()) {
+                            mEdgeGlowBottom.onRelease();
+                        }
+                    } else if (pulledToY > range) {
+                        mEdgeGlowBottom.onPull((float) deltaY / getHeight());
+                        if (!mEdgeGlowTop.isFinished()) {
+                            mEdgeGlowTop.onRelease();
+                        }
+                    }
+                    if (mEdgeGlowTop != null && (!mEdgeGlowTop.isFinished() || !mEdgeGlowBottom.isFinished())) {
+                        invalidate();
+                    }
+                }
+            }
+            break;
+        case MotionEvent.ACTION_UP:
+            if (mIsBeingDragged) {
+                final VelocityTracker velocityTracker = mVelocityTracker;
+                velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                int initialVelocity = (int) velocityTracker.getYVelocity(mActivePointerId);
+                if (getChildCount() > 0) {
+                    if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
+                        fling(-initialVelocity);
+                    } else {
+                        final int bottom = getScrollRange();
+                        if (mScroller.springBack(mScrollX, mScrollY, 0, 0, 0, bottom)) {
+                            invalidate();
+                        }
+                    }
+                }
+                mActivePointerId = INVALID_POINTER;
+                mIsBeingDragged = false;
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
+                if (mEdgeGlowTop != null) {
+                    mEdgeGlowTop.onRelease();
+                    mEdgeGlowBottom.onRelease();
+                }
+            }
+            break;
+        case MotionEvent.ACTION_CANCEL:
+            if (mIsBeingDragged && getChildCount() > 0) {
+                if (mScroller.springBack(mScrollX, mScrollY, 0, 0, 0, getScrollRange())) {
+                    invalidate();
+                }
+                mActivePointerId = INVALID_POINTER;
+                mIsBeingDragged = false;
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
+                if (mEdgeGlowTop != null) {
+                    mEdgeGlowTop.onRelease();
+                    mEdgeGlowBottom.onRelease();
+                }
+            }
+            break;
+        case MotionEvent.ACTION_POINTER_UP:
+            onSecondaryPointerUp(ev);
+            break;
+    }
+    return true;
+}","{
+    if (ev.getAction() == MotionEvent.ACTION_DOWN && ev.getEdgeFlags() != 0) {
+        // descendants.
+        return false;
+    }
+    if (mVelocityTracker == null) {
+        mVelocityTracker = VelocityTracker.obtain();
+    }
+    mVelocityTracker.addMovement(ev);
+    final int action = ev.getAction();
+    switch(action & MotionEvent.ACTION_MASK) {
+        case MotionEvent.ACTION_DOWN:
+            {
+                mIsBeingDragged = getChildCount() != 0;
+                if (!mIsBeingDragged) {
+                    return false;
+                }
+                /*
+                 * If being flinged and user touches, stop the fling. isFinished
+                 * will be false if being flinged.
+                 */
+                if (!mScroller.isFinished()) {
+                    mScroller.abortAnimation();
+                }
+                // Remember where the motion event started
+                mLastMotionY = ev.getY();
+                mActivePointerId = ev.getPointerId(0);
+                break;
+            }
+        case MotionEvent.ACTION_MOVE:
+            if (mIsBeingDragged) {
+                // Scroll to follow the motion event
+                final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
+                final float y = ev.getY(activePointerIndex);
+                final int deltaY = (int) (mLastMotionY - y);
+                mLastMotionY = y;
+                final int oldX = mScrollX;
+                final int oldY = mScrollY;
+                final int range = getScrollRange();
+                if (overScrollBy(0, deltaY, 0, mScrollY, 0, range, 0, mOverscrollDistance, true)) {
+                    // Break our velocity if we hit a scroll barrier.
+                    mVelocityTracker.clear();
+                }
+                onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+                final int overscrollMode = getOverScrollMode();
+                if (overscrollMode == OVER_SCROLL_ALWAYS || (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0)) {
+                    final int pulledToY = oldY + deltaY;
+                    if (pulledToY < 0) {
+                        mEdgeGlowTop.onPull((float) deltaY / getHeight());
+                        if (!mEdgeGlowBottom.isFinished()) {
+                            mEdgeGlowBottom.onRelease();
+                        }
+                    } else if (pulledToY > range) {
+                        mEdgeGlowBottom.onPull((float) deltaY / getHeight());
+                        if (!mEdgeGlowTop.isFinished()) {
+                            mEdgeGlowTop.onRelease();
+                        }
+                    }
+                    if (mEdgeGlowTop != null && (!mEdgeGlowTop.isFinished() || !mEdgeGlowBottom.isFinished())) {
+                        invalidate();
+                    }
+                }
+            }
+            break;
+        case MotionEvent.ACTION_UP:
+            if (mIsBeingDragged) {
+                final VelocityTracker velocityTracker = mVelocityTracker;
+                velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                int initialVelocity = (int) velocityTracker.getYVelocity(mActivePointerId);
+                if (getChildCount() > 0) {
+                    if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
+                        fling(-initialVelocity);
+                    } else {
+                        final int bottom = getScrollRange();
+                        if (mScroller.springBack(mScrollX, mScrollY, 0, 0, 0, bottom)) {
+                            invalidate();
+                        }
+                    }
+                }
+                mActivePointerId = INVALID_POINTER;
+                mIsBeingDragged = false;
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
+                if (mEdgeGlowTop != null) {
+                    mEdgeGlowTop.onRelease();
+                    mEdgeGlowBottom.onRelease();
+                }
+            }
+            break;
+        case MotionEvent.ACTION_CANCEL:
+            if (mIsBeingDragged && getChildCount() > 0) {
+                if (mScroller.springBack(mScrollX, mScrollY, 0, 0, 0, getScrollRange())) {
+                    invalidate();
+                }
+                mActivePointerId = INVALID_POINTER;
+                mIsBeingDragged = false;
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
+                if (mEdgeGlowTop != null) {
+                    mEdgeGlowTop.onRelease();
+                    mEdgeGlowBottom.onRelease();
+                }
+            }
+            break;
+        case MotionEvent.ACTION_POINTER_UP:
+            onSecondaryPointerUp(ev);
+            break;
+    }
+    return true;
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,"1,3",1,"In the 'ACTION_DOWN' case of the 'switch' block, two lines have been changed, namely the value of 'mIsBeingDragged' and the return statement. Hence, the code change types are 1 and 3.","Due to the code change, under the 'ACTION_DOWN' condition the function may return different values, in the late implementation, the `return false;` could lead to an earlier termination of the method. Therefore, the CI type is 1."
+23,<android.app.Activity: void performPause()>,9,10,<android.app.Activity: void performPause()>,<android.app.Activity: void performPause()>,0,"{
+    mCalled = false;
+    onPause();
+    if (!mCalled && getApplicationInfo().targetSdkVersion >= android.os.Build.VERSION_CODES.GINGERBREAD) {
+        throw new SuperNotCalledException(""Activity "" + mComponent.toShortString() + "" did not call through to super.onPause()"");
+    }
+}","{
+    mCalled = false;
+    onPause();
+    if (!mCalled && getApplicationInfo().targetSdkVersion >= android.os.Build.VERSION_CODES.GINGERBREAD) {
+        throw new SuperNotCalledException(""Activity "" + mComponent.toShortString() + "" did not call through to super.onPause()"");
+    }
+    mResumed = false;
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,4,0,"A new statement of `mResumed = false;` has been added at the end of the late version method. It doesn't belong to return, exception handling, or control dependency statements. So, the change type is classified as 4 (Other statement changed).","The new statement `mResumed = false;` does not cause this method to return a different value or throw a different exception, so it's unlikely to cause a compatibility issue. Therefore, the CI type is 0 (No Compatibility Issue exist)."
+24,<android.widget.TextView.SelectionModifierCursorController: void show()>,9,10,<android.widget.TextView.SelectionModifierCursorController: void show()>,<android.widget.TextView.SelectionModifierCursorController: void show()>,0,"{
+    if (isInBatchEditMode()) {
+        return;
+    }
+    mIsShowing = true;
+    updatePosition();
+    mStartHandle.show();
+    mEndHandle.show();
+    hideInsertionPointCursorController();
+    hideDelayed(DELAY_BEFORE_FADE_OUT);
+}","{
+    if (isInBatchEditMode()) {
+        return;
+    }
+    mIsShowing = true;
+    updatePosition();
+    mStartHandle.show();
+    mEndHandle.show();
+    hideInsertionPointCursorController();
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,4,0,"In the late implementation of the API, the method call to hideDelayed(DELAY_BEFORE_FADE_OUT) has been removed. As this statement is not about return, not about exception hanlding, not about control dependency, it is classified as ""Other statement changed"", so the change type is 4.","Though there is a change, it won't lead to a compatibility issue as it doesn't affect the return value or exception handling of the API, so the CI type is 0."
+25,"<android.bluetooth.BluetoothAdapter: BluetoothServerSocket listenUsingRfcommWithServiceRecord(String,UUID)>",9,10,"<android.bluetooth.BluetoothAdapter: BluetoothServerSocket listenUsingRfcommWithServiceRecord(String,UUID)>","<android.bluetooth.BluetoothAdapter: BluetoothServerSocket listenUsingRfcommWithServiceRecord(String,UUID)>",0,"{
+    RfcommChannelPicker picker = new RfcommChannelPicker(uuid);
+    BluetoothServerSocket socket;
+    int channel;
+    int errno;
+    while (true) {
+        channel = picker.nextChannel();
+        if (channel == -1) {
+            throw new IOException(""No available channels"");
+        }
+        socket = new BluetoothServerSocket(BluetoothSocket.TYPE_RFCOMM, true, true, channel);
+        errno = socket.mSocket.bindListen();
+        if (errno == 0) {
+            if (DBG)
+                Log.d(TAG, ""listening on RFCOMM channel "" + channel);
+            // success
+            break;
+        } else if (errno == BluetoothSocket.EADDRINUSE) {
+            if (DBG)
+                Log.d(TAG, ""RFCOMM channel "" + channel + "" in use"");
+            try {
+                socket.close();
+            } catch (IOException e) {
+            }
+            // try another channel
+            continue;
+        } else {
+            try {
+                socket.close();
+            } catch (IOException e) {
+            }
+            // Exception as a result of bindListen()
+            socket.mSocket.throwErrnoNative(errno);
+        }
+    }
+    int handle = -1;
+    try {
+        handle = mService.addRfcommServiceRecord(name, new ParcelUuid(uuid), channel, new Binder());
+    } catch (RemoteException e) {
+        Log.e(TAG, """", e);
+    }
+    if (handle == -1) {
+        try {
+            socket.close();
+        } catch (IOException e) {
+        }
+        throw new IOException(""Not able to register SDP record for "" + name);
+    }
+    socket.setCloseHandler(mHandler, handle);
+    return socket;
+}","{
+    return createNewRfcommSocketAndRecord(name, uuid, true, true);
+}",1,"/**
+ * Create a listening, secure RFCOMM Bluetooth socket with Service Record.
+ * <p>A remote device connecting to this socket will be authenticated and
+ * communication on this socket will be encrypted.
+ * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming
+ * connections from a listening {@link BluetoothServerSocket}.
+ * <p>The system will assign an unused RFCOMM channel to listen on.
+ * <p>The system will also register a Service Discovery
+ * Protocol (SDP) record with the local SDP server containing the specified
+ * UUID, service name, and auto-assigned channel. Remote Bluetooth devices
+ * can use the same UUID to query our SDP server and discover which channel
+ * to connect to. This SDP record will be removed when this socket is
+ * closed, or if this application closes unexpectedly.
+ * <p>Use {@link BluetoothDevice#createRfcommSocketToServiceRecord} to
+ * connect to this socket from another device using the same {@link UUID}.
+ * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+ * @param name service name for SDP record
+ * @param uuid uuid for SDP record
+ * @return a listening RFCOMM BluetoothServerSocket
+ * @throws IOException on error, for example Bluetooth not available, or
+ * insufficient permissions, or channel in use.
+ */
+","/**
+ * Create a listening, secure RFCOMM Bluetooth socket with Service Record.
+ * <p>A remote device connecting to this socket will be authenticated and
+ * communication on this socket will be encrypted.
+ * <p> Use this socket only if an authenticated socket link is possible.
+ * Authentication refers to the authentication of the link key to
+ * prevent man-in-the-middle type of attacks.
+ * For example, for Bluetooth 2.1 devices, if any of the devices does not
+ * have an input and output capability or just has the ability to
+ * display a numeric key, a secure socket connection is not possible.
+ * In such a case, use {#link listenUsingInsecureRfcommWithServiceRecord}.
+ * For more details, refer to the Security Model section 5.2 (vol 3) of
+ * Bluetooth Core Specification version 2.1 + EDR.
+ * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming
+ * connections from a listening {@link BluetoothServerSocket}.
+ * <p>The system will assign an unused RFCOMM channel to listen on.
+ * <p>The system will also register a Service Discovery
+ * Protocol (SDP) record with the local SDP server containing the specified
+ * UUID, service name, and auto-assigned channel. Remote Bluetooth devices
+ * can use the same UUID to query our SDP server and discover which channel
+ * to connect to. This SDP record will be removed when this socket is
+ * closed, or if this application closes unexpectedly.
+ * <p>Use {@link BluetoothDevice#createRfcommSocketToServiceRecord} to
+ * connect to this socket from another device using the same {@link UUID}.
+ * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+ * @param name service name for SDP record
+ * @param uuid uuid for SDP record
+ * @return a listening RFCOMM BluetoothServerSocket
+ * @throws IOException on error, for example Bluetooth not available, or
+ * insufficient permissions, or channel in use.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"1,5",1,"The entire return statement is changed to ""return createNewRfcommSocketAndRecord(name, uuid, true, true);"" and a new method ""createNewRfcommSocketAndRecord()"" is introduced, which changes the dependent APIs. Therefore, the code change types are 1,5.","The return statement changes from ""BluetoothServerSocket"" object to the result of the ""createNewRfcommSocketAndRecord()"" method, therefore the output of the API can be changed, leading to potential compatiblity issue of class 1."
+26,<android.widget.TextView.SelectionModifierCursorController: void updatePosition()>,9,10,<android.widget.TextView.SelectionModifierCursorController: void updatePosition()>,<android.widget.TextView.SelectionModifierCursorController: void updatePosition()>,0,"{
+    if (!isShowing()) {
+        return;
+    }
+    final int selectionStart = getSelectionStart();
+    final int selectionEnd = getSelectionEnd();
+    if ((selectionStart < 0) || (selectionEnd < 0)) {
+        // Should never happen, safety check.
+        Log.w(LOG_TAG, ""Update selection controller position called with no cursor"");
+        hide();
+        return;
+    }
+    mStartHandle.positionAtCursor(selectionStart, true);
+    mEndHandle.positionAtCursor(selectionEnd, true);
+    hideDelayed(DELAY_BEFORE_FADE_OUT);
+}","{
+    if (!isShowing()) {
+        return;
+    }
+    final int selectionStart = getSelectionStart();
+    final int selectionEnd = getSelectionEnd();
+    if ((selectionStart < 0) || (selectionEnd < 0)) {
+        // Should never happen, safety check.
+        Log.w(LOG_TAG, ""Update selection controller position called with no cursor"");
+        hide();
+        return;
+    }
+    mStartHandle.positionAtCursor(selectionStart, true);
+    mEndHandle.positionAtCursor(selectionEnd, true);
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,4,0,"The statement hideDelayed(DELAY_BEFORE_FADE_OUT) has been deleted in the late version implementation, so the code change type is 4.","Since the deletion of the statement does not affect the return values or throw any unexpected Exceptions, no compatibility issue was detected, and the CI type is 0."
+27,<android.nfc.NfcAdapter: NfcAdapter getDefaultAdapter()>,9,10,<android.nfc.NfcAdapter: NfcAdapter getDefaultAdapter()>,<android.nfc.NfcAdapter: NfcAdapter getDefaultAdapter()>,0,"{
+    synchronized (NfcAdapter.class) {
+        if (sIsInitialized) {
+            return sAdapter;
+        }
+        sIsInitialized = true;
+        /* is this device meant to have NFC */
+        if (!hasNfcFeature()) {
+            Log.v(TAG, ""this device does not have NFC support"");
+            return null;
+        }
+        INfcAdapter service = getServiceInterface();
+        if (service == null) {
+            Log.e(TAG, ""could not retrieve NFC service"");
+            return null;
+        }
+        sAdapter = new NfcAdapter(service);
+        return sAdapter;
+    }
+}","{
+    Log.w(TAG, ""WARNING: NfcAdapter.getDefaultAdapter() is deprecated, use "" + ""NfcAdapter.getDefaultAdapter(Context) instead"", new Exception());
+    return new NfcAdapter(null);
+}",1,"/**
+ * Get a handle to the default NFC Adapter on this Android device.
+ * <p>
+ * Most Android devices will only have one NFC Adapter (NFC Controller).
+ *
+ * @return the default NFC adapter, or null if no NFC adapter exists
+ */
+","/**
+ * Get a handle to the default NFC Adapter on this Android device.
+ * <p>
+ * Most Android devices will only have one NFC Adapter (NFC Controller).
+ *
+ * @return the default NFC adapter, or null if no NFC adapter exists
+ * @deprecated use {@link #getDefaultAdapter(Context)}
+ */
+",-1,,[@Deprecated],-1,-1,-1,-1,-1,-1,"1,4,5",1,"The method content has drastically changed. Firstly, the return statement is now returning a new NfcAdapter object, whereas in the prior version, the return statement was either returning sAdapter or null based on various conditions. Secondly, the prior version had conditions containing the method hasNfcFeature() and getServiceInterface(), while these scenarios are missing in the late version. Lastly, a dependent API (NfcAdapter) is changed. Hence, the change types are 1, 4, and 5.","Since the return value has been notably changed (from conditional return statements to an unconditional new NfcAdapter(null)), the API will return a different value, leading to a compatibility issue of type 1."
+29,<android.app.ContextImpl: Object getSystemService(String)>,9,10,<android.app.ContextImpl: Object getSystemService(String)>,<android.app.ContextImpl: Object getSystemService(String)>,0,"{
+    if (WINDOW_SERVICE.equals(name)) {
+        return WindowManagerImpl.getDefault();
+    } else if (LAYOUT_INFLATER_SERVICE.equals(name)) {
+        synchronized (mSync) {
+            LayoutInflater inflater = mLayoutInflater;
+            if (inflater != null) {
+                return inflater;
+            }
+            mLayoutInflater = inflater = PolicyManager.makeNewLayoutInflater(getOuterContext());
+            return inflater;
+        }
+    } else if (ACTIVITY_SERVICE.equals(name)) {
+        return getActivityManager();
+    } else if (INPUT_METHOD_SERVICE.equals(name)) {
+        return InputMethodManager.getInstance(this);
+    } else if (ALARM_SERVICE.equals(name)) {
+        return getAlarmManager();
+    } else if (ACCOUNT_SERVICE.equals(name)) {
+        return getAccountManager();
+    } else if (POWER_SERVICE.equals(name)) {
+        return getPowerManager();
+    } else if (CONNECTIVITY_SERVICE.equals(name)) {
+        return getConnectivityManager();
+    } else if (THROTTLE_SERVICE.equals(name)) {
+        return getThrottleManager();
+    } else if (WIFI_SERVICE.equals(name)) {
+        return getWifiManager();
+    } else if (NOTIFICATION_SERVICE.equals(name)) {
+        return getNotificationManager();
+    } else if (KEYGUARD_SERVICE.equals(name)) {
+        return new KeyguardManager();
+    } else if (ACCESSIBILITY_SERVICE.equals(name)) {
+        return AccessibilityManager.getInstance(this);
+    } else if (LOCATION_SERVICE.equals(name)) {
+        return getLocationManager();
+    } else if (SEARCH_SERVICE.equals(name)) {
+        return getSearchManager();
+    } else if (SENSOR_SERVICE.equals(name)) {
+        return getSensorManager();
+    } else if (STORAGE_SERVICE.equals(name)) {
+        return getStorageManager();
+    } else if (VIBRATOR_SERVICE.equals(name)) {
+        return getVibrator();
+    } else if (STATUS_BAR_SERVICE.equals(name)) {
+        synchronized (mSync) {
+            if (mStatusBarManager == null) {
+                mStatusBarManager = new StatusBarManager(getOuterContext());
+            }
+            return mStatusBarManager;
+        }
+    } else if (AUDIO_SERVICE.equals(name)) {
+        return getAudioManager();
+    } else if (TELEPHONY_SERVICE.equals(name)) {
+        return getTelephonyManager();
+    } else if (CLIPBOARD_SERVICE.equals(name)) {
+        return getClipboardManager();
+    } else if (WALLPAPER_SERVICE.equals(name)) {
+        return getWallpaperManager();
+    } else if (DROPBOX_SERVICE.equals(name)) {
+        return getDropBoxManager();
+    } else if (DEVICE_POLICY_SERVICE.equals(name)) {
+        return getDevicePolicyManager();
+    } else if (UI_MODE_SERVICE.equals(name)) {
+        return getUiModeManager();
+    } else if (DOWNLOAD_SERVICE.equals(name)) {
+        return getDownloadManager();
+    }
+    return null;
+}","{
+    if (WINDOW_SERVICE.equals(name)) {
+        return WindowManagerImpl.getDefault();
+    } else if (LAYOUT_INFLATER_SERVICE.equals(name)) {
+        synchronized (mSync) {
+            LayoutInflater inflater = mLayoutInflater;
+            if (inflater != null) {
+                return inflater;
+            }
+            mLayoutInflater = inflater = PolicyManager.makeNewLayoutInflater(getOuterContext());
+            return inflater;
+        }
+    } else if (ACTIVITY_SERVICE.equals(name)) {
+        return getActivityManager();
+    } else if (INPUT_METHOD_SERVICE.equals(name)) {
+        return InputMethodManager.getInstance(this);
+    } else if (ALARM_SERVICE.equals(name)) {
+        return getAlarmManager();
+    } else if (ACCOUNT_SERVICE.equals(name)) {
+        return getAccountManager();
+    } else if (POWER_SERVICE.equals(name)) {
+        return getPowerManager();
+    } else if (CONNECTIVITY_SERVICE.equals(name)) {
+        return getConnectivityManager();
+    } else if (THROTTLE_SERVICE.equals(name)) {
+        return getThrottleManager();
+    } else if (WIFI_SERVICE.equals(name)) {
+        return getWifiManager();
+    } else if (NOTIFICATION_SERVICE.equals(name)) {
+        return getNotificationManager();
+    } else if (KEYGUARD_SERVICE.equals(name)) {
+        return new KeyguardManager();
+    } else if (ACCESSIBILITY_SERVICE.equals(name)) {
+        return AccessibilityManager.getInstance(this);
+    } else if (LOCATION_SERVICE.equals(name)) {
+        return getLocationManager();
+    } else if (SEARCH_SERVICE.equals(name)) {
+        return getSearchManager();
+    } else if (SENSOR_SERVICE.equals(name)) {
+        return getSensorManager();
+    } else if (STORAGE_SERVICE.equals(name)) {
+        return getStorageManager();
+    } else if (VIBRATOR_SERVICE.equals(name)) {
+        return getVibrator();
+    } else if (STATUS_BAR_SERVICE.equals(name)) {
+        synchronized (mSync) {
+            if (mStatusBarManager == null) {
+                mStatusBarManager = new StatusBarManager(getOuterContext());
+            }
+            return mStatusBarManager;
+        }
+    } else if (AUDIO_SERVICE.equals(name)) {
+        return getAudioManager();
+    } else if (TELEPHONY_SERVICE.equals(name)) {
+        return getTelephonyManager();
+    } else if (CLIPBOARD_SERVICE.equals(name)) {
+        return getClipboardManager();
+    } else if (WALLPAPER_SERVICE.equals(name)) {
+        return getWallpaperManager();
+    } else if (DROPBOX_SERVICE.equals(name)) {
+        return getDropBoxManager();
+    } else if (DEVICE_POLICY_SERVICE.equals(name)) {
+        return getDevicePolicyManager();
+    } else if (UI_MODE_SERVICE.equals(name)) {
+        return getUiModeManager();
+    } else if (DOWNLOAD_SERVICE.equals(name)) {
+        return getDownloadManager();
+    } else if (NFC_SERVICE.equals(name)) {
+        return getNfcManager();
+    }
+    return null;
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,"1,5",1,"An else if statement ""else if (NFC_SERVICE.equals(name)) {",
+30,"<android.webkit.HTML5VideoViewProxy.VideoPlayer: void play(String,int,HTML5VideoViewProxy,WebChromeClient)>",9,10,"<android.webkit.HTML5VideoViewProxy.VideoPlayer: void play(String,int,HTML5VideoViewProxy,WebChromeClient)>","<android.webkit.HTML5VideoViewProxy.VideoPlayer: void play(String,int,HTML5VideoViewProxy,WebChromeClient)>",0,"{
+    if (mCurrentProxy == proxy) {
+        if (!mVideoView.isPlaying()) {
+            mVideoView.start();
+        }
+        return;
+    }
+    if (mCurrentProxy != null) {
+        // Some other video is already playing. Notify the caller that its playback ended.
+        proxy.dispatchOnEnded();
+        return;
+    }
+    mCurrentProxy = proxy;
+    // Create a FrameLayout that will contain the VideoView and the
+    // progress view (if any).
+    mLayout = new FrameLayout(proxy.getContext());
+    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+    mVideoView = new VideoView(proxy.getContext());
+    mVideoView.setWillNotDraw(false);
+    mVideoView.setMediaController(new MediaController(proxy.getContext()));
+    String cookieValue = CookieManager.getInstance().getCookie(url);
+    Map<String, String> headers = null;
+    if (cookieValue != null) {
+        headers = new HashMap<String, String>();
+        headers.put(COOKIE, cookieValue);
+    }
+    mVideoView.setVideoURI(Uri.parse(url), headers);
+    mVideoView.setOnCompletionListener(proxy);
+    mVideoView.setOnPreparedListener(proxy);
+    mVideoView.setOnErrorListener(proxy);
+    mVideoView.seekTo(time);
+    mLayout.addView(mVideoView, layoutParams);
+    mProgressView = client.getVideoLoadingProgressView();
+    if (mProgressView != null) {
+        mLayout.addView(mProgressView, layoutParams);
+        mProgressView.setVisibility(View.VISIBLE);
+    }
+    mLayout.setVisibility(View.VISIBLE);
+    mTimer = new Timer();
+    mVideoView.start();
+    client.onShowCustomView(mLayout, mCallback);
+}","{
+    if (mCurrentProxy == proxy) {
+        if (!mVideoView.isPlaying()) {
+            mVideoView.start();
+        }
+        return;
+    }
+    if (mCurrentProxy != null) {
+        // Some other video is already playing. Notify the caller that its playback ended.
+        proxy.dispatchOnEnded();
+        return;
+    }
+    mCurrentProxy = proxy;
+    // Create a FrameLayout that will contain the VideoView and the
+    // progress view (if any).
+    mLayout = new FrameLayout(proxy.getContext());
+    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+    mVideoView = new VideoView(proxy.getContext());
+    mVideoView.setWillNotDraw(false);
+    mVideoView.setMediaController(new MediaController(proxy.getContext()));
+    String cookieValue = CookieManager.getInstance().getCookie(url);
+    Map<String, String> headers = null;
+    if (cookieValue != null) {
+        headers = new HashMap<String, String>();
+        headers.put(COOKIE, cookieValue);
+    }
+    mVideoView.setVideoURI(Uri.parse(url), headers);
+    mVideoView.setOnCompletionListener(proxy);
+    mVideoView.setOnPreparedListener(proxy);
+    mVideoView.setOnErrorListener(proxy);
+    mVideoView.seekTo(time);
+    mLayout.addView(mVideoView, layoutParams);
+    mProgressView = client.getVideoLoadingProgressView();
+    if (mProgressView != null) {
+        mLayout.addView(mProgressView, layoutParams);
+        mProgressView.setVisibility(View.VISIBLE);
+    }
+    mLayout.setVisibility(View.VISIBLE);
+    mTimer = new Timer();
+    mVideoView.start();
+    client.onShowCustomView(mLayout, mCallback);
+    // Plugins like Flash will draw over the video so hide
+    // them while we're playing.
+    mCurrentProxy.getWebView().getViewManager().hideAll();
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,4,0,"A new regular statement (mCurrentProxy.getWebView().getViewManager().hideAll();) has been added to the end of the method, so the change type is 4.","The added regular statement is about hiding potential overlays while the video is playing and it does not affect the return value or cause a different exception to be thrown, therefore, no Compatibility Issue exists, so the CI type is 0."
+32,<android.app.backup.BackupManager: int requestRestore(RestoreObserver)>,9,10,<android.app.backup.BackupManager: int requestRestore(RestoreObserver)>,<android.app.backup.BackupManager: int requestRestore(RestoreObserver)>,0,"{
+    int result = -1;
+    checkServiceBinder();
+    if (sService != null) {
+        RestoreSession session = null;
+        try {
+            String transport = sService.getCurrentTransport();
+            IRestoreSession binder = sService.beginRestoreSession(transport);
+            session = new RestoreSession(mContext, binder);
+            result = session.restorePackage(mContext.getPackageName(), observer);
+        } catch (RemoteException e) {
+            Log.w(TAG, ""restoreSelf() unable to contact service"");
+        } finally {
+            if (session != null) {
+                session.endRestoreSession();
+            }
+        }
+    }
+    return result;
+}","{
+    int result = -1;
+    checkServiceBinder();
+    if (sService != null) {
+        RestoreSession session = null;
+        try {
+            IRestoreSession binder = sService.beginRestoreSession(mContext.getPackageName(), null);
+            session = new RestoreSession(mContext, binder);
+            result = session.restorePackage(mContext.getPackageName(), observer);
+        } catch (RemoteException e) {
+            Log.w(TAG, ""restoreSelf() unable to contact service"");
+        } finally {
+            if (session != null) {
+                session.endRestoreSession();
+            }
+        }
+    }
+    return result;
+}",1,"/**
+ * Restore the calling application from backup.  The data will be restored from the
+ * current backup dataset if the application has stored data there, or from
+ * the dataset used during the last full device setup operation if the current
+ * backup dataset has no matching data.  If no backup data exists for this application
+ * in either source, a nonzero value will be returned.
+ *
+ * <p>If this method returns zero (meaning success), the OS will attempt to retrieve
+ * a backed-up dataset from the remote transport, instantiate the application's
+ * backup agent, and pass the dataset to the agent's
+ * {@link android.app.backup.BackupAgent#onRestore(BackupDataInput, int, android.os.ParcelFileDescriptor) onRestore()}
+ * method.
+ *
+ * @param observer The {@link RestoreObserver} to receive callbacks during the restore
+ * operation. This must not be null.
+ *
+ * @return Zero on success; nonzero on error.
+ */
+","/**
+ * Restore the calling application from backup.  The data will be restored from the
+ * current backup dataset if the application has stored data there, or from
+ * the dataset used during the last full device setup operation if the current
+ * backup dataset has no matching data.  If no backup data exists for this application
+ * in either source, a nonzero value will be returned.
+ *
+ * <p>If this method returns zero (meaning success), the OS will attempt to retrieve
+ * a backed-up dataset from the remote transport, instantiate the application's
+ * backup agent, and pass the dataset to the agent's
+ * {@link android.app.backup.BackupAgent#onRestore(BackupDataInput, int, android.os.ParcelFileDescriptor) onRestore()}
+ * method.
+ *
+ * @param observer The {@link RestoreObserver} to receive callbacks during the restore
+ * operation. This must not be null.
+ *
+ * @return Zero on success; nonzero on error.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"1,5",1,"The dependent API sService.beginRestoreSession(transport) is altered as the method parameter is changed from `transport` to `mContext.getPackageName(), null`, so the code change type is 1,5.","The change on method parameter can lead to different result produced by sService.beginRestoreSession and subsequently cause the API to return a different value, which is a compatibility issue type 1."
+34,"<android.speech.tts.TextToSpeech: int speak(String,int,HashMap<String, String>)>",9,10,"<android.speech.tts.TextToSpeech: int speak(String,int,HashMap<String, String>)>","<android.speech.tts.TextToSpeech: int speak(String,int,HashMap<String, String>)>",0,"{
+    synchronized (mStartLock) {
+        int result = ERROR;
+        Log.i(""TTS received: "", text);
+        if (!mStarted) {
+            return result;
+        }
+        try {
+            if ((params != null) && (!params.isEmpty())) {
+                String extra = params.get(Engine.KEY_PARAM_STREAM);
+                if (extra != null) {
+                    mCachedParams[Engine.PARAM_POSITION_STREAM + 1] = extra;
+                }
+                extra = params.get(Engine.KEY_PARAM_UTTERANCE_ID);
+                if (extra != null) {
+                    mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = extra;
+                }
+                extra = params.get(Engine.KEY_PARAM_ENGINE);
+                if (extra != null) {
+                    mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = extra;
+                }
+            }
+            result = mITts.speak(mPackageName, text, queueMode, mCachedParams);
+        } catch (RemoteException e) {
+            // TTS died; restart it.
+            Log.e(""TextToSpeech.java - speak"", ""RemoteException"");
+            e.printStackTrace();
+            mStarted = false;
+            initTts();
+        } catch (NullPointerException e) {
+            // TTS died; restart it.
+            Log.e(""TextToSpeech.java - speak"", ""NullPointerException"");
+            e.printStackTrace();
+            mStarted = false;
+            initTts();
+        } catch (IllegalStateException e) {
+            // TTS died; restart it.
+            Log.e(""TextToSpeech.java - speak"", ""IllegalStateException"");
+            e.printStackTrace();
+            mStarted = false;
+            initTts();
+        } finally {
+            resetCachedParams();
+            return result;
+        }
+    }
+}","{
+    synchronized (mStartLock) {
+        int result = ERROR;
+        Log.i(""TextToSpeech.java - speak"", ""speak text of length "" + text.length());
+        if (!mStarted) {
+            Log.e(""TextToSpeech.java - speak"", ""service isn't started"");
+            return result;
+        }
+        try {
+            if ((params != null) && (!params.isEmpty())) {
+                String extra = params.get(Engine.KEY_PARAM_STREAM);
+                if (extra != null) {
+                    mCachedParams[Engine.PARAM_POSITION_STREAM + 1] = extra;
+                }
+                extra = params.get(Engine.KEY_PARAM_UTTERANCE_ID);
+                if (extra != null) {
+                    mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = extra;
+                }
+                extra = params.get(Engine.KEY_PARAM_ENGINE);
+                if (extra != null) {
+                    mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = extra;
+                }
+            }
+            result = mITts.speak(mPackageName, text, queueMode, mCachedParams);
+        } catch (RemoteException e) {
+            // TTS died; restart it.
+            Log.e(""TextToSpeech.java - speak"", ""RemoteException"");
+            e.printStackTrace();
+            mStarted = false;
+            initTts();
+        } catch (NullPointerException e) {
+            // TTS died; restart it.
+            Log.e(""TextToSpeech.java - speak"", ""NullPointerException"");
+            e.printStackTrace();
+            mStarted = false;
+            initTts();
+        } catch (IllegalStateException e) {
+            // TTS died; restart it.
+            Log.e(""TextToSpeech.java - speak"", ""IllegalStateException"");
+            e.printStackTrace();
+            mStarted = false;
+            initTts();
+        } finally {
+            resetCachedParams();
+            return result;
+        }
+    }
+}",1,"/**
+ * Speaks the string using the specified queuing strategy and speech
+ * parameters.
+ *
+ * @param text
+ * The string of text to be spoken.
+ * @param queueMode
+ * The queuing strategy to use.
+ * {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
+ * @param params
+ * The list of parameters to be used. Can be null if no parameters are given.
+ * They are specified using a (key, value) pair, where the key can be
+ * {@link Engine#KEY_PARAM_STREAM} or
+ * {@link Engine#KEY_PARAM_UTTERANCE_ID}.
+ *
+ * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+ */
+","/**
+ * Speaks the string using the specified queuing strategy and speech
+ * parameters.
+ *
+ * @param text
+ * The string of text to be spoken.
+ * @param queueMode
+ * The queuing strategy to use.
+ * {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
+ * @param params
+ * The list of parameters to be used. Can be null if no parameters are given.
+ * They are specified using a (key, value) pair, where the key can be
+ * {@link Engine#KEY_PARAM_STREAM} or
+ * {@link Engine#KEY_PARAM_UTTERANCE_ID}.
+ *
+ * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,4,0,"The changes observed here are mostly references to new logging tags in the Log calls, there are no key method logic or implementations changed, so the code change type is 4.","Despite the changes in output log messages, the logic of the API remains consistent between the two versions. This means that neither the return values nor the exception handling of the method has changed, so there's no Compatibility Issue."

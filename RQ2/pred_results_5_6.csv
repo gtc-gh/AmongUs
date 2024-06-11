@@ -1,0 +1,3189 @@
+Number,Signature,Early_Version,Late_Version,Early_Signature,Late_Signature,Diff_Signature,Early_Implementation,Late_Implementation,Diff_Implementation,Early_Comment,Late_Comment,Diff_Comment,Early_Annotation,Late_Annotation,Diff_Annotation,Early_Callback,Late_Callback,Diff_Callback,GT_CI_ControlFlow,GT_CI_Type,pred_change,pred_CI,change_description,CI_description
+1,"<android.accounts.AccountManager: String peekAuthToken(Account,String)>",5,6,"<android.accounts.AccountManager: String peekAuthToken(Account,String)>","<android.accounts.AccountManager: String peekAuthToken(Account,String)>",0,"{
+    try {
+        return mService.peekAuthToken(account, authTokenType);
+    } catch (RemoteException e) {
+        // won't ever happen
+        throw new RuntimeException(e);
+    }
+}","{
+    if (account == null) {
+        Log.e(TAG, ""peekAuthToken: the account must not be null"");
+        return null;
+    }
+    if (authTokenType == null) {
+        return null;
+    }
+    try {
+        return mService.peekAuthToken(account, authTokenType);
+    } catch (RemoteException e) {
+        // won't ever happen
+        throw new RuntimeException(e);
+    }
+}",1,,"/**
+ * Gets the authtoken named by ""authTokenType"" for the specified account if it is cached
+ * by the AccountManager. If no authtoken is cached then null is returned rather than
+ * asking the authenticaticor to generate one. If the account or the
+ * authtoken do not exist then null is returned.
+ * <p>
+ * Requires that the caller has permission
+ * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and is running
+ * with the same UID as the Authenticator for the account.
+ * @param account the account whose authtoken is to be retrieved, must not be null
+ * @param authTokenType the type of authtoken to retrieve
+ * @return an authtoken for the given account and authTokenType, if one is cached by the
+ * AccountManager, null otherwise.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"1,3",1,"The implementation of the method in the late version introduced two new condition checks on 'account' and 'authTokenType', and two new return statements are included in these condition checks. So, the code change type is 1,3.","Because of the introducing of the condition checks on 'account' and 'authTokenType', the method will potentially return a different value (i.e., null) when 'account' or 'authTokenType' is null, so the CI type is 1."
+2,<android.pim.vcard.VCardParser_V21: void parseItems()>,5,6,<android.pim.vcard.VCardParser_V21: void parseItems()>,<android.pim.vcard.VCardParser_V21: void parseItems()>,0,"{
+    /* items *CRLF item / item */
+    boolean ended = false;
+    if (mBuilder != null) {
+        long start = System.currentTimeMillis();
+        mBuilder.startProperty();
+        mTimeStartProperty += System.currentTimeMillis() - start;
+    }
+    ended = parseItem();
+    if (mBuilder != null && !ended) {
+        long start = System.currentTimeMillis();
+        mBuilder.endProperty();
+        mTimeEndProperty += System.currentTimeMillis() - start;
+    }
+    while (!ended) {
+        // follow VCARD ,it wont reach endProperty
+        if (mBuilder != null) {
+            long start = System.currentTimeMillis();
+            mBuilder.startProperty();
+            mTimeStartProperty += System.currentTimeMillis() - start;
+        }
+        ended = parseItem();
+        if (mBuilder != null && !ended) {
+            long start = System.currentTimeMillis();
+            mBuilder.endProperty();
+            mTimeEndProperty += System.currentTimeMillis() - start;
+        }
+    }
+}","{
+    /* items *CRLF item / item */
+    boolean ended = false;
+    if (mBuilder != null) {
+        long start = System.currentTimeMillis();
+        mBuilder.startProperty();
+        mTimeStartProperty += System.currentTimeMillis() - start;
+    }
+    ended = parseItem();
+    if (mBuilder != null && !ended) {
+        long start = System.currentTimeMillis();
+        mBuilder.endProperty();
+        mTimeEndProperty += System.currentTimeMillis() - start;
+    }
+    while (!ended) {
+        // follow VCARD ,it wont reach endProperty
+        if (mBuilder != null) {
+            long start = System.currentTimeMillis();
+            mBuilder.startProperty();
+            mTimeStartProperty += System.currentTimeMillis() - start;
+        }
+        try {
+            ended = parseItem();
+        } catch (VCardInvalidCommentLineException e) {
+            Log.e(LOG_TAG, ""Invalid line which looks like some comment was found. Ignored."");
+            ended = false;
+        }
+        if (mBuilder != null && !ended) {
+            long start = System.currentTimeMillis();
+            mBuilder.endProperty();
+            mTimeEndProperty += System.currentTimeMillis() - start;
+        }
+    }
+}",1,"/**
+ * items = *CRLF item
+ * / item
+ */
+","/**
+ * items = *CRLF item
+ * / item
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"2,3",2,"An exception handling statement has been introduced (catching VCardInvalidCommentLineException) to the loop within the method and also the control dependency(i.e., the loop) has changed, so the code change type is 2,3.","The introduced exception handling could potentially lead to different behavior when encountering a VCardInvalidCommentLineException in the late version API, thus the CI type is 2."
+3,"<android.content.ContentProviderOperation.Builder: Builder withSelection(String,String[])>",5,6,"<android.content.ContentProviderOperation.Builder: Builder withSelection(String,String[])>","<android.content.ContentProviderOperation.Builder: Builder withSelection(String,String[])>",0,"{
+    if (mType != TYPE_UPDATE && mType != TYPE_DELETE && mType != TYPE_ASSERT) {
+        throw new IllegalArgumentException(""only updates, deletes, and asserts can have selections"");
+    }
+    mSelection = selection;
+    mSelectionArgs = selectionArgs;
+    return this;
+}","{
+    if (mType != TYPE_UPDATE && mType != TYPE_DELETE && mType != TYPE_ASSERT) {
+        throw new IllegalArgumentException(""only updates, deletes, and asserts can have selections"");
+    }
+    mSelection = selection;
+    if (selectionArgs == null) {
+        mSelectionArgs = null;
+    } else {
+        mSelectionArgs = new String[selectionArgs.length];
+        System.arraycopy(selectionArgs, 0, mSelectionArgs, 0, selectionArgs.length);
+    }
+    return this;
+}",1,"/**
+ * The selection and arguments to use. An occurrence of '?' in the selection will be
+ * replaced with the corresponding occurence of the selection argument. Any of the
+ * selection arguments may be overwritten by a selection argument back reference as
+ * specified by {@link #withSelectionBackReference}.
+ * This can only be used with builders of type update, delete, or assert.
+ * @return this builder, to allow for chaining.
+ */
+","/**
+ * The selection and arguments to use. An occurrence of '?' in the selection will be
+ * replaced with the corresponding occurence of the selection argument. Any of the
+ * selection arguments may be overwritten by a selection argument back reference as
+ * specified by {@link #withSelectionBackReference}.
+ * This can only be used with builders of type update, delete, or assert.
+ * @return this builder, to allow for chaining.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"3,1",1,"The condition 'if (selectionArgs == null)' has been introduced and an assignment statement 'mSelectionArgs = new String[selectionArgs.length]' also has been added accordingly. Therefore, the change type is 3 and 1.","The API now may produce different results when 'selectionArgs' is not null due to the change in assignment of mSelectionArgs, which could potentially lead to different return values. Therefore, the CI type is 1."
+4,"<android.app.WallpaperManager.Globals: Bitmap peekWallpaperBitmap(Context,boolean)>",5,6,"<android.app.WallpaperManager.Globals: Bitmap peekWallpaperBitmap(Context,boolean)>","<android.app.WallpaperManager.Globals: Bitmap peekWallpaperBitmap(Context,boolean)>",0,"{
+    synchronized (this) {
+        if (mWallpaper != null) {
+            return mWallpaper;
+        }
+        if (mDefaultWallpaper != null) {
+            return mDefaultWallpaper;
+        }
+        mWallpaper = getCurrentWallpaperLocked(context);
+        if (mWallpaper == null && returnDefault) {
+            mDefaultWallpaper = getDefaultWallpaperLocked(context);
+            return mDefaultWallpaper;
+        }
+        return mWallpaper;
+    }
+}","{
+    synchronized (this) {
+        if (mWallpaper != null) {
+            return mWallpaper;
+        }
+        if (mDefaultWallpaper != null) {
+            return mDefaultWallpaper;
+        }
+        mWallpaper = null;
+        try {
+            mWallpaper = getCurrentWallpaperLocked(context);
+        } catch (OutOfMemoryError e) {
+            Log.w(TAG, ""No memory load current wallpaper"", e);
+        }
+        if (mWallpaper == null && returnDefault) {
+            mDefaultWallpaper = getDefaultWallpaperLocked(context);
+            return mDefaultWallpaper;
+        }
+        return mWallpaper;
+    }
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"2,4,5","1,2","There's an introduction of an exception handling block where `OutOfMemoryError` exception is caught. Also, the method `mWallpaper = getCurrentWallpaperLocked(context);` has been replaced with a different set of method calls `mWallpaper = null;` and the try-catch block in the late version. Therefore, this change belongs to categories 2 (Exception handling statement changed), 4 (Other statement changed), and 5 (Dependent API changed).","The introduction of an exception handling block changes the behavior of the method, because if the `getCurrentWallpaperLocked(context)` method throws an `OutOfMemoryError` exception, it's now caught and handled in the late version, potentially leading to different return values. Therefore, the CI type is both 1 (Compatibility Issue caused by potential different return values) and 2 (Compatibility Issue caused by potential different exception handlings)."
+5,<android.webkit.WebView: boolean onTrackballEvent(MotionEvent)>,5,6,<android.webkit.WebView: boolean onTrackballEvent(MotionEvent)>,<android.webkit.WebView: boolean onTrackballEvent(MotionEvent)>,0,"{
+    long time = ev.getEventTime();
+    if ((ev.getMetaState() & KeyEvent.META_ALT_ON) != 0) {
+        if (ev.getY() > 0)
+            pageDown(true);
+        if (ev.getY() < 0)
+            pageUp(true);
+        return true;
+    }
+    if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+        mTrackballDown = true;
+        if (mNativeClass == 0) {
+            return false;
+        }
+        nativeRecordButtons(hasFocus() && hasWindowFocus(), true, true);
+        if (time - mLastCursorTime <= TRACKBALL_TIMEOUT && !mLastCursorBounds.equals(nativeGetCursorRingBounds())) {
+            nativeSelectBestAt(mLastCursorBounds);
+        }
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, ""onTrackballEvent down ev="" + ev + "" time="" + time + "" mLastCursorTime="" + mLastCursorTime);
+        }
+        if (isInTouchMode())
+            requestFocusFromTouch();
+        // let common code in onKeyDown at it
+        return false;
+    }
+    if (ev.getAction() == MotionEvent.ACTION_UP) {
+        // LONG_PRESS_CENTER is set in common onKeyDown
+        mPrivateHandler.removeMessages(LONG_PRESS_CENTER);
+        mTrackballDown = false;
+        mTrackballUpTime = time;
+        if (mShiftIsPressed) {
+            if (mExtendSelection) {
+                commitCopy();
+            } else {
+                mExtendSelection = true;
+            }
+        }
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, ""onTrackballEvent up ev="" + ev + "" time="" + time);
+        }
+        // let common code in onKeyUp at it
+        return false;
+    }
+    if (mMapTrackballToArrowKeys && mShiftIsPressed == false) {
+        if (DebugFlags.WEB_VIEW)
+            Log.v(LOGTAG, ""onTrackballEvent gmail quit"");
+        return false;
+    }
+    if (mTrackballDown) {
+        if (DebugFlags.WEB_VIEW)
+            Log.v(LOGTAG, ""onTrackballEvent down quit"");
+        // discard move if trackball is down
+        return true;
+    }
+    if (time - mTrackballUpTime < TRACKBALL_TIMEOUT) {
+        if (DebugFlags.WEB_VIEW)
+            Log.v(LOGTAG, ""onTrackballEvent up timeout quit"");
+        return true;
+    }
+    // TODO: alternatively we can do panning as touch does
+    switchOutDrawHistory();
+    if (time - mTrackballLastTime > TRACKBALL_TIMEOUT) {
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, ""onTrackballEvent time="" + time + "" last="" + mTrackballLastTime);
+        }
+        mTrackballFirstTime = time;
+        mTrackballXMove = mTrackballYMove = 0;
+    }
+    mTrackballLastTime = time;
+    if (DebugFlags.WEB_VIEW) {
+        Log.v(LOGTAG, ""onTrackballEvent ev="" + ev + "" time="" + time);
+    }
+    mTrackballRemainsX += ev.getX();
+    mTrackballRemainsY += ev.getY();
+    doTrackball(time);
+    return true;
+}","{
+    long time = ev.getEventTime();
+    if ((ev.getMetaState() & KeyEvent.META_ALT_ON) != 0) {
+        if (ev.getY() > 0)
+            pageDown(true);
+        if (ev.getY() < 0)
+            pageUp(true);
+        return true;
+    }
+    if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+        if (mShiftIsPressed) {
+            // discard press if copy in progress
+            return true;
+        }
+        mTrackballDown = true;
+        if (mNativeClass == 0) {
+            return false;
+        }
+        nativeRecordButtons(hasFocus() && hasWindowFocus(), true, true);
+        if (time - mLastCursorTime <= TRACKBALL_TIMEOUT && !mLastCursorBounds.equals(nativeGetCursorRingBounds())) {
+            nativeSelectBestAt(mLastCursorBounds);
+        }
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, ""onTrackballEvent down ev="" + ev + "" time="" + time + "" mLastCursorTime="" + mLastCursorTime);
+        }
+        if (isInTouchMode())
+            requestFocusFromTouch();
+        // let common code in onKeyDown at it
+        return false;
+    }
+    if (ev.getAction() == MotionEvent.ACTION_UP) {
+        // LONG_PRESS_CENTER is set in common onKeyDown
+        mPrivateHandler.removeMessages(LONG_PRESS_CENTER);
+        mTrackballDown = false;
+        mTrackballUpTime = time;
+        if (mShiftIsPressed) {
+            if (mExtendSelection) {
+                commitCopy();
+            } else {
+                mExtendSelection = true;
+            }
+            // discard press if copy in progress
+            return true;
+        }
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, ""onTrackballEvent up ev="" + ev + "" time="" + time);
+        }
+        // let common code in onKeyUp at it
+        return false;
+    }
+    if (mMapTrackballToArrowKeys && mShiftIsPressed == false) {
+        if (DebugFlags.WEB_VIEW)
+            Log.v(LOGTAG, ""onTrackballEvent gmail quit"");
+        return false;
+    }
+    if (mTrackballDown) {
+        if (DebugFlags.WEB_VIEW)
+            Log.v(LOGTAG, ""onTrackballEvent down quit"");
+        // discard move if trackball is down
+        return true;
+    }
+    if (time - mTrackballUpTime < TRACKBALL_TIMEOUT) {
+        if (DebugFlags.WEB_VIEW)
+            Log.v(LOGTAG, ""onTrackballEvent up timeout quit"");
+        return true;
+    }
+    // TODO: alternatively we can do panning as touch does
+    switchOutDrawHistory();
+    if (time - mTrackballLastTime > TRACKBALL_TIMEOUT) {
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, ""onTrackballEvent time="" + time + "" last="" + mTrackballLastTime);
+        }
+        mTrackballFirstTime = time;
+        mTrackballXMove = mTrackballYMove = 0;
+    }
+    mTrackballLastTime = time;
+    if (DebugFlags.WEB_VIEW) {
+        Log.v(LOGTAG, ""onTrackballEvent ev="" + ev + "" time="" + time);
+    }
+    mTrackballRemainsX += ev.getX();
+    mTrackballRemainsY += ev.getY();
+    doTrackball(time);
+    return true;
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,"1,3",1,"There are changes in both return statements and control conditions in the code. For example, a new return statement ""return true;"" has been introduced under the condition "" if (mShiftIsPressed) "". The implementation inside the control condition "" if (ev.getAction() == MotionEvent.ACTION_DOWN) "" has also been changed. Therefore, the code change type is 1,3.","With the changes in the return statements and control conditions, the API might behave differently and potentially return different values in the two versions. Therefore, the Compatibility Issue type is 1."
+6,<android.webkit.WebView: boolean pageDown(boolean)>,5,6,<android.webkit.WebView: boolean pageDown(boolean)>,<android.webkit.WebView: boolean pageDown(boolean)>,0,"{
+    if (mNativeClass == 0) {
+        return false;
+    }
+    // start next trackball movement from page edge
+    nativeClearCursor();
+    if (bottom) {
+        return pinScrollTo(mScrollX, mContentHeight, true, 0);
+    }
+    // Page down.
+    int h = getHeight();
+    int y;
+    if (h > 2 * PAGE_SCROLL_OVERLAP) {
+        y = h - PAGE_SCROLL_OVERLAP;
+    } else {
+        y = h / 2;
+    }
+    mUserScroll = true;
+    return mScroller.isFinished() ? pinScrollBy(0, y, true, 0) : extendScroll(y);
+}","{
+    if (mNativeClass == 0) {
+        return false;
+    }
+    // start next trackball movement from page edge
+    nativeClearCursor();
+    if (bottom) {
+        return pinScrollTo(mScrollX, computeVerticalScrollRange(), true, 0);
+    }
+    // Page down.
+    int h = getHeight();
+    int y;
+    if (h > 2 * PAGE_SCROLL_OVERLAP) {
+        y = h - PAGE_SCROLL_OVERLAP;
+    } else {
+        y = h / 2;
+    }
+    mUserScroll = true;
+    return mScroller.isFinished() ? pinScrollBy(0, y, true, 0) : extendScroll(y);
+}",1,"/**
+ * Scroll the contents of the view down by half the page size
+ * @param bottom true to jump to bottom of page
+ * @return true if the page was scrolled
+ */
+","/**
+ * Scroll the contents of the view down by half the page size
+ * @param bottom true to jump to bottom of page
+ * @return true if the page was scrolled
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"1,5",1,The parameter value passed to the pinScrollTo() method has been changed from mContentHeight to computeVerticalScrollRange() which can be classified as a return statement change (1) and a dependent API change (5).,"The use of a different value as the second argument to pinScrollTo() may cause the method to return a different result to the value of bottom and thereby potentially change the outcome of the API, which leads to a compatibility issue (1)."
+7,<android.server.BluetoothA2dpService: boolean suspendSink(BluetoothDevice)>,5,6,<android.server.BluetoothA2dpService: boolean suspendSink(BluetoothDevice)>,<android.server.BluetoothA2dpService: boolean suspendSink(BluetoothDevice)>,0,"{
+    mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM, ""Need BLUETOOTH_ADMIN permission"");
+    if (DBG)
+        log(""suspendSink("" + device + ""), mSuspending: "" + mSuspending + "", mResuming: "" + mResuming);
+    if (mSuspending) {
+        return true;
+    }
+    if (device == null || mAudioDevices == null) {
+        return false;
+    }
+    String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
+    Integer state = mAudioDevices.get(device);
+    if (path == null || state == null) {
+        return false;
+    }
+    switch(state.intValue()) {
+        case BluetoothA2dp.STATE_CONNECTED:
+            if (mResuming) {
+                mSuspending = true;
+            }
+            return true;
+        case BluetoothA2dp.STATE_PLAYING:
+            mAudioManager.setParameters(""A2dpSuspended=true"");
+            mSuspending = suspendSinkNative(path);
+            return mSuspending;
+        default:
+            return false;
+    }
+}","{
+    mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM, ""Need BLUETOOTH_ADMIN permission"");
+    if (DBG)
+        log(""suspendSink("" + device + ""), mTargetA2dpState: "" + mTargetA2dpState);
+    if (device == null || mAudioDevices == null) {
+        return false;
+    }
+    String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
+    Integer state = mAudioDevices.get(device);
+    if (path == null || state == null) {
+        return false;
+    }
+    mTargetA2dpState = BluetoothA2dp.STATE_CONNECTED;
+    return checkSinkSuspendState(state.intValue());
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"1,3,4",1,"The control statement involving 'mSuspending' and 'mResuming' has been deleted, a new control statement about 'mTargetA2dpState' has been added, and a new method checkSinkSuspendState() has been called in the return statement. So the code change type is 1,3,4.","As the control statement change and different return statement will make the method potentially return a different value in late version, thus the CI type is 1."
+8,"<android.accounts.AccountManager: AccountManagerFuture<Account[]> getAccountsByTypeAndFeatures(String,String[],AccountManagerCallback<Account[]>,Handler)>",5,6,"<android.accounts.AccountManager: AccountManagerFuture<Account[]> getAccountsByTypeAndFeatures(String,String[],AccountManagerCallback<Account[]>,Handler)>","<android.accounts.AccountManager: AccountManagerFuture<Account[]> getAccountsByTypeAndFeatures(String,String[],AccountManagerCallback<Account[]>,Handler)>",0,"{
+    if (type == null)
+        throw new IllegalArgumentException(""type is null"");
+    return new Future2Task<Account[]>(handler, callback) {
+
+        public void doWork() throws RemoteException {
+            mService.getAccountsByFeatures(mResponse, type, features);
+        }
+
+        public Account[] bundleToResult(Bundle bundle) throws AuthenticatorException {
+            if (!bundle.containsKey(KEY_ACCOUNTS)) {
+                throw new AuthenticatorException(""no result in response"");
+            }
+            final Parcelable[] parcelables = bundle.getParcelableArray(KEY_ACCOUNTS);
+            Account[] descs = new Account[parcelables.length];
+            for (int i = 0; i < parcelables.length; i++) {
+                descs[i] = (Account) parcelables[i];
+            }
+            return descs;
+        }
+    }.start();
+}","{
+    return new Future2Task<Account[]>(handler, callback) {
+
+        public void doWork() throws RemoteException {
+            if (type == null) {
+                Log.e(TAG, ""Type is null"");
+                set(new Account[0]);
+                return;
+            }
+            mService.getAccountsByFeatures(mResponse, type, features);
+        }
+
+        public Account[] bundleToResult(Bundle bundle) throws AuthenticatorException {
+            if (!bundle.containsKey(KEY_ACCOUNTS)) {
+                throw new AuthenticatorException(""no result in response"");
+            }
+            final Parcelable[] parcelables = bundle.getParcelableArray(KEY_ACCOUNTS);
+            Account[] descs = new Account[parcelables.length];
+            for (int i = 0; i < parcelables.length; i++) {
+                descs[i] = (Account) parcelables[i];
+            }
+            return descs;
+        }
+    }.start();
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"3,4","1,2","The control dependency and error handling statements have changed. The condition ""if (type == null)"" was initially outside the Future2Task, throwing an IllegalArgumentException when the type was null. In the late version, this condition is incorporated inside the Future2Task object and changes the method execution flow if the type is null, which refers to change types 3,4.","Due to the change in error handling, the API now potentially returns an empty array of Accounts when the type is null, while before it would throw an IllegalArgumentException. It also behaves differently in the case of a RemoteException. Therefore, the compatibility issue types are 1,2."
+11,<android.content.res.AssetManager: CharSequence getResourceText(int)>,5,6,<android.content.res.AssetManager: CharSequence getResourceText(int)>,<android.content.res.AssetManager: CharSequence getResourceText(int)>,0,"{
+    synchronized (mSync) {
+        TypedValue tmpValue = mValue;
+        int block = loadResourceValue(ident, tmpValue, true);
+        if (block >= 0) {
+            if (tmpValue.type == TypedValue.TYPE_STRING) {
+                return mStringBlocks[block].get(tmpValue.data);
+            }
+            return tmpValue.coerceToString();
+        }
+    }
+    return null;
+}","{
+    synchronized (this) {
+        TypedValue tmpValue = mValue;
+        int block = loadResourceValue(ident, tmpValue, true);
+        if (block >= 0) {
+            if (tmpValue.type == TypedValue.TYPE_STRING) {
+                return mStringBlocks[block].get(tmpValue.data);
+            }
+            return tmpValue.coerceToString();
+        }
+    }
+    return null;
+}",1,"/*package*/
+","/*package*/
+",-1,,,-1,-1,-1,-1,-1,-1,4,0,"The synchronization object in the synchronization block has changed from ""mSync"" to ""this"", so the code change type is 4.","The change in the synchronization object doesn't affect the return values or exceptions the method throws, therefore, no compatibility issue exists. Hence, the CI type is 0."
+12,"<android.accounts.AccountManager: boolean addAccountExplicitly(Account,String,Bundle)>",5,6,"<android.accounts.AccountManager: boolean addAccountExplicitly(Account,String,Bundle)>","<android.accounts.AccountManager: boolean addAccountExplicitly(Account,String,Bundle)>",0,"{
+    try {
+        return mService.addAccount(account, password, extras);
+    } catch (RemoteException e) {
+        // won't ever happen
+        throw new RuntimeException(e);
+    }
+}","{
+    try {
+        return mService.addAccount(account, password, userdata);
+    } catch (RemoteException e) {
+        // won't ever happen
+        throw new RuntimeException(e);
+    }
+}",1,,"/**
+ * Add an account to the AccountManager's set of known accounts.
+ * <p>
+ * Requires that the caller has permission
+ * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and is running
+ * with the same UID as the Authenticator for the account.
+ * @param account The account to add
+ * @param password The password to associate with the account. May be null.
+ * @param userdata A bundle of key/value pairs to set as the account's userdata. May be null.
+ * @return true if the account was sucessfully added, false otherwise, for example,
+ * if the account already exists or if the account is null
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"1,5",1,"The original code has mService.addAccount() because the password and extras have changed, and addAccount's third parameter has changed from 'userdata' to 'extras'. Therefore, the code change types are 1 and 5.","The mService.addAccount() method potentially returns a different value, because the parameters have changed. Therefore, the Change Index (CI) type is 1."
+15,<android.webkit.WebView: int findAll(String)>,5,6,<android.webkit.WebView: int findAll(String)>,<android.webkit.WebView: int findAll(String)>,0,"{
+    if (mFindIsUp == false) {
+        recordNewContentSize(mContentWidth, mContentHeight + mFindHeight, false);
+        mFindIsUp = true;
+    }
+    int result = nativeFindAll(find.toLowerCase(), find.toUpperCase());
+    invalidate();
+    return result;
+}","{
+    // client isn't initialized
+    if (0 == mNativeClass)
+        return 0;
+    if (mFindIsUp == false) {
+        recordNewContentSize(mContentWidth, mContentHeight + mFindHeight, false);
+        mFindIsUp = true;
+    }
+    int result = nativeFindAll(find.toLowerCase(), find.toUpperCase());
+    invalidate();
+    return result;
+}",1,"/*
+     * Find all instances of find on the page and highlight them.
+     * @param find  String to find.
+     * @return int  The number of occurances of the String ""find""
+     *              that were found.
+     */
+","/*
+     * Find all instances of find on the page and highlight them.
+     * @param find  String to find.
+     * @return int  The number of occurances of the String ""find""
+     *              that were found.
+     */
+",-1,,,-1,-1,-1,-1,-1,-1,"3,4",1,"There are additional 'if' control statement and a conditional 'return' statement has been included in the late version API. Therefore, the code change types include control dependency change (3) and other change (4) due to the introduction of a new early return statement.","The introduced 'return 0' statement under the condition 'if (0 == mNativeClass)' may cause the API to return a different value than the early version. Therefore, the API contains a potential compatibility issue of returning a different value (1)."
+16,<android.service.wallpaper.WallpaperService.Engine: void doOffsetsChanged()>,5,6,<android.service.wallpaper.WallpaperService.Engine: void doOffsetsChanged()>,<android.service.wallpaper.WallpaperService.Engine: void doOffsetsChanged()>,0,"{
+    if (mDestroyed) {
+        return;
+    }
+    float xOffset;
+    float yOffset;
+    boolean sync;
+    synchronized (mLock) {
+        xOffset = mPendingXOffset;
+        yOffset = mPendingYOffset;
+        sync = mPendingSync;
+        mPendingSync = false;
+        mOffsetMessageEnqueued = false;
+    }
+    if (DEBUG)
+        Log.v(TAG, ""Offsets change in "" + this + "": "" + xOffset + "","" + yOffset);
+    final int availw = mIWallpaperEngine.mReqWidth - mCurWidth;
+    final int xPixels = availw > 0 ? -(int) (availw * xOffset + .5f) : 0;
+    final int availh = mIWallpaperEngine.mReqHeight - mCurHeight;
+    final int yPixels = availh > 0 ? -(int) (availh * yOffset + .5f) : 0;
+    onOffsetsChanged(xOffset, yOffset, xPixels, yPixels);
+    if (sync) {
+        try {
+            if (DEBUG)
+                Log.v(TAG, ""Reporting offsets change complete"");
+            mSession.wallpaperOffsetsComplete(mWindow.asBinder());
+        } catch (RemoteException e) {
+        }
+    }
+}","{
+    if (mDestroyed) {
+        return;
+    }
+    float xOffset;
+    float yOffset;
+    float xOffsetStep;
+    float yOffsetStep;
+    boolean sync;
+    synchronized (mLock) {
+        xOffset = mPendingXOffset;
+        yOffset = mPendingYOffset;
+        xOffsetStep = mPendingXOffsetStep;
+        yOffsetStep = mPendingYOffsetStep;
+        sync = mPendingSync;
+        mPendingSync = false;
+        mOffsetMessageEnqueued = false;
+    }
+    if (DEBUG)
+        Log.v(TAG, ""Offsets change in "" + this + "": "" + xOffset + "","" + yOffset);
+    final int availw = mIWallpaperEngine.mReqWidth - mCurWidth;
+    final int xPixels = availw > 0 ? -(int) (availw * xOffset + .5f) : 0;
+    final int availh = mIWallpaperEngine.mReqHeight - mCurHeight;
+    final int yPixels = availh > 0 ? -(int) (availh * yOffset + .5f) : 0;
+    onOffsetsChanged(xOffset, yOffset, xOffsetStep, yOffsetStep, xPixels, yPixels);
+    if (sync) {
+        try {
+            if (DEBUG)
+                Log.v(TAG, ""Reporting offsets change complete"");
+            mSession.wallpaperOffsetsComplete(mWindow.asBinder());
+        } catch (RemoteException e) {
+        }
+    }
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"1,4,5",1,"New variables are introduced, and also the dependent API's parameters changes (onOffsetsChanged(xOffset, yOffset, xOffsetStep, yOffsetStep, xPixels, yPixels)), so the code change type is 1,4,5.","The change in parameters of onOffsetsChanged() method could lead to different behaviour when the late version API is invoked, thus the CI type is 1."
+19,"<android.accounts.AccountManager: void setUserData(Account,String,String)>",5,6,"<android.accounts.AccountManager: void setUserData(Account,String,String)>","<android.accounts.AccountManager: void setUserData(Account,String,String)>",0,"{
+    try {
+        mService.setUserData(account, key, value);
+    } catch (RemoteException e) {
+        // won't ever happen
+        throw new RuntimeException(e);
+    }
+}","{
+    if (account == null) {
+        Log.e(TAG, ""the account must not be null"");
+        return;
+    }
+    if (key == null) {
+        Log.e(TAG, ""the key must not be null"");
+        return;
+    }
+    try {
+        mService.setUserData(account, key, value);
+    } catch (RemoteException e) {
+        // won't ever happen
+        throw new RuntimeException(e);
+    }
+}",1,,"/**
+ * Sets account's userdata named ""key"" to the specified value. If the account does not
+ * exist then this call has no effect.
+ * <p>
+ * Requires that the caller has permission
+ * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and is running
+ * with the same UID as the Authenticator for the account.
+ * @param account the account whose userdata is to be set. Must not be null.
+ * @param key the key of the userdata to set. Must not be null.
+ * @param value the value to set. May be null.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"1,3",1,"Two new return statements have been introduced in the late version when 'account == null' and 'key == null', which is classified as return statement change (1) and control dependency change (3).","The introduction of new return statements might result in different return values or the method might not proceed as expected when 'account' or 'key' is null. Hence, this is a compatibility issue caused by potential different return values (1)."
+20,<android.widget.AbsListView: boolean onInterceptTouchEvent(MotionEvent)>,5,6,<android.widget.AbsListView: boolean onInterceptTouchEvent(MotionEvent)>,<android.widget.AbsListView: boolean onInterceptTouchEvent(MotionEvent)>,0,"{
+    int action = ev.getAction();
+    int x = (int) ev.getX();
+    int y = (int) ev.getY();
+    View v;
+    if (mFastScroller != null) {
+        boolean intercepted = mFastScroller.onInterceptTouchEvent(ev);
+        if (intercepted) {
+            return true;
+        }
+    }
+    switch(action) {
+        case MotionEvent.ACTION_DOWN:
+            {
+                int motionPosition = findMotionRow(y);
+                if (mTouchMode != TOUCH_MODE_FLING && motionPosition >= 0) {
+                    // User clicked on an actual view (and was not stopping a fling).
+                    // Remember where the motion event started
+                    v = getChildAt(motionPosition - mFirstPosition);
+                    mMotionViewOriginalTop = v.getTop();
+                    mMotionX = x;
+                    mMotionY = y;
+                    mMotionPosition = motionPosition;
+                    mTouchMode = TOUCH_MODE_DOWN;
+                    clearScrollingCache();
+                }
+                mLastY = Integer.MIN_VALUE;
+                break;
+            }
+        case MotionEvent.ACTION_MOVE:
+            {
+                switch(mTouchMode) {
+                    case TOUCH_MODE_DOWN:
+                        if (startScrollIfNeeded(y - mMotionY)) {
+                            return true;
+                        }
+                        break;
+                }
+                break;
+            }
+        case MotionEvent.ACTION_UP:
+            {
+                mTouchMode = TOUCH_MODE_REST;
+                reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
+                break;
+            }
+    }
+    return false;
+}","{
+    int action = ev.getAction();
+    int x = (int) ev.getX();
+    int y = (int) ev.getY();
+    View v;
+    if (mFastScroller != null) {
+        boolean intercepted = mFastScroller.onInterceptTouchEvent(ev);
+        if (intercepted) {
+            return true;
+        }
+    }
+    switch(action) {
+        case MotionEvent.ACTION_DOWN:
+            {
+                int motionPosition = findMotionRow(y);
+                if (mTouchMode != TOUCH_MODE_FLING && motionPosition >= 0) {
+                    // User clicked on an actual view (and was not stopping a fling).
+                    // Remember where the motion event started
+                    v = getChildAt(motionPosition - mFirstPosition);
+                    mMotionViewOriginalTop = v.getTop();
+                    mMotionX = x;
+                    mMotionY = y;
+                    mMotionPosition = motionPosition;
+                    mTouchMode = TOUCH_MODE_DOWN;
+                    clearScrollingCache();
+                }
+                mLastY = Integer.MIN_VALUE;
+                if (mTouchMode == TOUCH_MODE_FLING) {
+                    return true;
+                }
+                break;
+            }
+        case MotionEvent.ACTION_MOVE:
+            {
+                switch(mTouchMode) {
+                    case TOUCH_MODE_DOWN:
+                        if (startScrollIfNeeded(y - mMotionY)) {
+                            return true;
+                        }
+                        break;
+                }
+                break;
+            }
+        case MotionEvent.ACTION_UP:
+            {
+                mTouchMode = TOUCH_MODE_REST;
+                reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
+                break;
+            }
+    }
+    return false;
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,"1,3",1,"In the 'case MotionEvent.ACTION_DOWN', the 'if conditional' and a return statement has been added in the later version, therefore the code change type is 1,3.","This change allows the method to return a different value based on this new condition in the late version, which might lead to compatibility issue regarding potential different return values. Therefore, the CI type is 1."
+22,<android.bluetooth.BluetoothAdapter.RfcommChannelPicker: int nextChannel()>,5,6,<android.bluetooth.BluetoothAdapter.RfcommChannelPicker: int nextChannel()>,<android.bluetooth.BluetoothAdapter.RfcommChannelPicker: int nextChannel()>,0,"{
+    // always pick the same channel to try first
+    int channel = mUuid.hashCode();
+    Integer channelInt;
+    while (mChannels.size() > 0) {
+        channelInt = new Integer(channel);
+        if (mChannels.remove(channelInt)) {
+            return channel;
+        }
+        channel = (channel % BluetoothSocket.MAX_RFCOMM_CHANNEL) + 1;
+    }
+    return -1;
+}","{
+    if (mChannels.size() == 0) {
+        return -1;
+    }
+    return mChannels.remove(sRandom.nextInt(mChannels.size()));
+}",1,"/* Returns next channel, or -1 if we're out */
+","/* Returns next random channel, or -1 if we're out */
+",-1,,,-1,-1,-1,-1,-1,-1,"1,3",1,"The entire implementation logic has been modified. The variable 'channel' has been removed and the way of choosing the next channel has been changed from internal calculation to using random number from the size of mChannels. This leads to code change type 1,3.","Since the way of selecting the next channel has been changed completely, it has the potential to return a different value. It could cause differences in behavior for code that relies on the previous implementation. Hence, the CI type is 1."
+25,<android.webkit.WebView: void requestImageRef(Message)>,5,6,<android.webkit.WebView: void requestImageRef(Message)>,<android.webkit.WebView: void requestImageRef(Message)>,0,"{
+    int contentX = viewToContentX((int) mLastTouchX + mScrollX);
+    int contentY = viewToContentY((int) mLastTouchY + mScrollY);
+    String ref = nativeImageURI(contentX, contentY);
+    Bundle data = msg.getData();
+    data.putString(""url"", ref);
+    msg.setData(data);
+    msg.sendToTarget();
+}","{
+    // client isn't initialized
+    if (0 == mNativeClass)
+        return;
+    int contentX = viewToContentX((int) mLastTouchX + mScrollX);
+    int contentY = viewToContentY((int) mLastTouchY + mScrollY);
+    String ref = nativeImageURI(contentX, contentY);
+    Bundle data = msg.getData();
+    data.putString(""url"", ref);
+    msg.setData(data);
+    msg.sendToTarget();
+}",1,"/**
+ * Request the url of the image last touched by the user. msg will be sent
+ * to its target with a String representing the url as its object.
+ *
+ * @param msg This message will be dispatched with the result of the request
+ * as the data member with ""url"" as key. The result can be null.
+ */
+","/**
+ * Request the url of the image last touched by the user. msg will be sent
+ * to its target with a String representing the url as its object.
+ *
+ * @param msg This message will be dispatched with the result of the request
+ * as the data member with ""url"" as key. The result can be null.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,3,0,"In the late version, an 'if' control statement is added for checking whether the client is initialized or not. Therefore, the code change type is 3.","Even though an 'if' statement is added, it doesn't change the behavior of the API because it doesn't affect the return type and the exception handling of the method. Therefore, no compatibility issues exist."
+27,"<android.content.res.AssetManager: AssetFileDescriptor openNonAssetFd(int,String)>",5,6,"<android.content.res.AssetManager: AssetFileDescriptor openNonAssetFd(int,String)>","<android.content.res.AssetManager: AssetFileDescriptor openNonAssetFd(int,String)>",0,"{
+    synchronized (mSync) {
+        if (!mOpen) {
+            throw new RuntimeException(""Assetmanager has been closed"");
+        }
+        ParcelFileDescriptor pfd = openNonAssetFdNative(cookie, fileName, mOffsets);
+        if (pfd != null) {
+            return new AssetFileDescriptor(pfd, mOffsets[0], mOffsets[1]);
+        }
+    }
+    throw new FileNotFoundException(""Asset absolute file: "" + fileName);
+}","{
+    synchronized (this) {
+        if (!mOpen) {
+            throw new RuntimeException(""Assetmanager has been closed"");
+        }
+        ParcelFileDescriptor pfd = openNonAssetFdNative(cookie, fileName, mOffsets);
+        if (pfd != null) {
+            return new AssetFileDescriptor(pfd, mOffsets[0], mOffsets[1]);
+        }
+    }
+    throw new FileNotFoundException(""Asset absolute file: "" + fileName);
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,4,0,"The method has changed the type of ""synchronized"" block from 'mSync' to 'this', which fits in type 4 - other statement changed.","This change does not impact the behaviour of the API method or what it returns. There are no new exceptions thrown, return statements introduced or deleted, or changes to the conditions under which different return statements or exception handlings occur. Therefore, there is no compatibility issue."
+28,"<android.accounts.AbstractAccountAuthenticator.Transport: void confirmCredentials(IAccountAuthenticatorResponse,Account,Bundle)>",5,6,"<android.accounts.AbstractAccountAuthenticator.Transport: void confirmCredentials(IAccountAuthenticatorResponse,Account,Bundle)>","<android.accounts.AbstractAccountAuthenticator.Transport: void confirmCredentials(IAccountAuthenticatorResponse,Account,Bundle)>",0,"{
+    checkBinderPermission();
+    final Bundle result;
+    try {
+        result = AbstractAccountAuthenticator.this.confirmCredentials(new AccountAuthenticatorResponse(response), account, options);
+    } catch (UnsupportedOperationException e) {
+        response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION, ""confirmCredentials not supported"");
+        return;
+    }
+    if (result != null) {
+        response.onResult(result);
+    } else {
+        response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, ""no response from the authenticator"");
+    }
+}","{
+    checkBinderPermission();
+    try {
+        final Bundle result = AbstractAccountAuthenticator.this.confirmCredentials(new AccountAuthenticatorResponse(response), account, options);
+        if (result != null) {
+            response.onResult(result);
+        }
+    } catch (NetworkErrorException e) {
+        response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+    } catch (UnsupportedOperationException e) {
+        response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION, ""confirmCredentials not supported"");
+    }
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"2,3,4","1,2","The exception handling statement (catch block) has changed. The condition check and return statement has been moved into the try block and an extra catch block for NetworkErrorException has been added. Therefore, the code change type would be 2,3 and 4.","The exception being caught has changed from UnsupportedOperationException to NetworkErrorException. So the type of exception that the function throws has potentially changed, causing a type 2 CI. Furthermore, the return statement has been moved within a try-catch block, which could potentially cause the function to return different results depending on the exception thrown. This would imply a type 1 CI."
+29,"<android.accounts.AbstractAccountAuthenticator.Transport: void getAccountRemovalAllowed(IAccountAuthenticatorResponse,Account)>",5,6,"<android.accounts.AbstractAccountAuthenticator.Transport: void getAccountRemovalAllowed(IAccountAuthenticatorResponse,Account)>","<android.accounts.AbstractAccountAuthenticator.Transport: void getAccountRemovalAllowed(IAccountAuthenticatorResponse,Account)>",0,"{
+    checkBinderPermission();
+    try {
+        final Bundle result = AbstractAccountAuthenticator.this.getAccountRemovalAllowed(new AccountAuthenticatorResponse(response), account);
+        if (result != null) {
+            response.onResult(result);
+        } else {
+            response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, ""no response from the authenticator"");
+        }
+    } catch (UnsupportedOperationException e) {
+        response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION, ""getAccountRemovalAllowed not supported"");
+    } catch (NetworkErrorException e) {
+        response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+    }
+}","{
+    checkBinderPermission();
+    try {
+        final Bundle result = AbstractAccountAuthenticator.this.getAccountRemovalAllowed(new AccountAuthenticatorResponse(response), account);
+        if (result != null) {
+            response.onResult(result);
+        }
+    } catch (UnsupportedOperationException e) {
+        response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION, ""getAccountRemovalAllowed not supported"");
+    } catch (NetworkErrorException e) {
+        response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+    }
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,2,2,"The exception handling statement 'response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, ""no response from the authenticator"");' is removed in the late version. Therefore, the code change type is 2.",The removal of the exception handling statement potentially leads to the API throwing different exceptions. Hence the Compatibility Issue type is 2.
+30,<android.os.PowerManager.WakeLock: void release()>,5,6,<android.os.PowerManager.WakeLock: void release()>,<android.os.PowerManager.WakeLock: void release()>,0,"{
+    synchronized (mToken) {
+        if (!mRefCounted || --mCount == 0) {
+            try {
+                mService.releaseWakeLock(mToken);
+            } catch (RemoteException e) {
+            }
+            mHeld = false;
+        }
+        if (mCount < 0) {
+            throw new RuntimeException(""WakeLock under-locked "" + mTag);
+        }
+    }
+}","{
+    release(0);
+}",1,"/**
+ * Release your claim to the CPU or screen being on.
+ *
+ * <p>
+ * It may turn off shortly after you release it, or it may not if there
+ * are other wake locks held.
+ */
+","/**
+ * Release your claim to the CPU or screen being on.
+ *
+ * <p>
+ * It may turn off shortly after you release it, or it may not if there
+ * are other wake locks held.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"1,5","1,2","The implementation of the method changes completely. The early version has a set of logic including `if` statements and `try...catch` block while the later version just calls `release(0)`. Therefore, the code change types are 1 (return statement changed) and 5 (dependent API changed).","The previous method logic has been replaced by a new method call `release(0)`, which could possibly lead to a different return value or a different exception. Thus, the CI types are 1 (Compatibility Issue caused by potential different return values or types) and 2 (Compatibility Issue caused by potential different exception handlings)."
+31,<android.webkit.WebView: PluginList getPluginList()>,5,6,<android.webkit.WebView: PluginList getPluginList()>,<android.webkit.WebView: PluginList getPluginList()>,0,"{
+    return null;
+}","{
+    return new PluginList();
+}",1,"/**
+ * Return the list of currently loaded plugins.
+ * @return The list of currently loaded plugins.
+ *
+ * @deprecated This was used for Gears, which has been deprecated.
+ */
+","/**
+ * Return the list of currently loaded plugins.
+ * @return The list of currently loaded plugins.
+ *
+ * @deprecated This was used for Gears, which has been deprecated.
+ */
+",-1,[@Deprecated],[@Deprecated],-1,-1,-1,-1,-1,-1,1,1,"The return statement has been changed, it returns null in the early version, while returns a new instance of PluginList class in the late version. Thus, the returned value (also the returned type) has been modified, so the code change type is 1.","The API will return a different type of value (null or PluginList instance) in the two versions, which may lead to a different program behavior depending on the usage of the returned value. So, the Compatibility Issue type is 1."
+32,<android.server.BluetoothService.BondState: boolean isAutoPairingBlacklisted(String)>,5,6,<android.server.BluetoothService.BondState: boolean isAutoPairingBlacklisted(String)>,<android.server.BluetoothService.BondState: boolean isAutoPairingBlacklisted(String)>,0,"{
+    for (String blacklistAddress : mAutoPairingAddressBlacklist) {
+        if (address.startsWith(blacklistAddress))
+            return true;
+    }
+    String name = getRemoteName(address);
+    if (name != null) {
+        for (String blacklistName : mAutoPairingNameBlacklist) {
+            if (name.equals(blacklistName))
+                return true;
+        }
+    }
+    return false;
+}","{
+    for (String blacklistAddress : mAutoPairingAddressBlacklist) {
+        if (address.startsWith(blacklistAddress))
+            return true;
+    }
+    String name = getRemoteName(address);
+    if (name != null) {
+        for (String blacklistName : mAutoPairingExactNameBlacklist) {
+            if (name.equals(blacklistName))
+                return true;
+        }
+        for (String blacklistName : mAutoPairingPartialNameBlacklist) {
+            if (name.startsWith(blacklistName))
+                return true;
+        }
+    }
+    return false;
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"3,4",1,"Both the condition and the return statements inside of the second 'for' loop have changed. Also, a new 'for' loop was added. Previous 'for' loop was modified to check if the 'name' starts with 'blacklistName' instead of checking the equality. Therefore, the change type is 3,4.","These changes can cause the method to potentially return different values because the conditions for returning 'true' has increased. That means, in the late implementation the method might return true in cases where the early implementation would have returned false. Therefore, the CI type is 1."
+33,"<android.accounts.AbstractAccountAuthenticator.Transport: void hasFeatures(IAccountAuthenticatorResponse,Account,String[])>",5,6,"<android.accounts.AbstractAccountAuthenticator.Transport: void hasFeatures(IAccountAuthenticatorResponse,Account,String[])>","<android.accounts.AbstractAccountAuthenticator.Transport: void hasFeatures(IAccountAuthenticatorResponse,Account,String[])>",0,"{
+    checkBinderPermission();
+    final Bundle result;
+    try {
+        result = AbstractAccountAuthenticator.this.hasFeatures(new AccountAuthenticatorResponse(response), account, features);
+    } catch (UnsupportedOperationException e) {
+        response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION, ""hasFeatures not supported"");
+        return;
+    } catch (NetworkErrorException e) {
+        response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+        return;
+    }
+    if (result != null) {
+        response.onResult(result);
+    } else {
+        response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, ""no response from the authenticator"");
+    }
+}","{
+    checkBinderPermission();
+    try {
+        final Bundle result = AbstractAccountAuthenticator.this.hasFeatures(new AccountAuthenticatorResponse(response), account, features);
+        if (result != null) {
+            response.onResult(result);
+        }
+    } catch (UnsupportedOperationException e) {
+        response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION, ""hasFeatures not supported"");
+    } catch (NetworkErrorException e) {
+        response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+    }
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"1,3",1,"The position of the return statement under the condition 'if(result != null)' and the initialization and assignment of 'result' has moved inside the try block. Both changes can be classified as changes in the return statement and control dependency, so the code change types are 1,3.","The change of the return statement's control dependency and the error handling could potentially cause the API to return a different variable or value, so the CI type is 1."
+35,<android.content.SyncManager.SyncQueue: void removeByKey(String)>,5,6,<android.content.SyncManager.SyncQueue: void removeByKey(String)>,<android.content.SyncManager.SyncQueue: void removeByKey(String)>,0,"{
+    if (DEBUG_CHECK_DATA_CONSISTENCY)
+        debugCheckDataStructures(true);
+    SyncOperation operationToRemove = mOpsByKey.remove(operationKey);
+    if (!mOpsByWhen.remove(operationToRemove)) {
+        throw new IllegalStateException(""unable to find "" + operationToRemove + "" in mOpsByWhen"");
+    }
+    if (!mSyncStorageEngine.deleteFromPending(operationToRemove.pendingOperation)) {
+        throw new IllegalStateException(""unable to find pending row for "" + operationToRemove);
+    }
+    if (DEBUG_CHECK_DATA_CONSISTENCY)
+        debugCheckDataStructures(true);
+}","{
+    if (DEBUG_CHECK_DATA_CONSISTENCY)
+        debugCheckDataStructures(true);
+    SyncOperation operationToRemove = mOpsByKey.remove(operationKey);
+    if (!mOpsByWhen.remove(operationToRemove)) {
+        throw new IllegalStateException(""unable to find "" + operationToRemove + "" in mOpsByWhen"");
+    }
+    if (!mSyncStorageEngine.deleteFromPending(operationToRemove.pendingOperation)) {
+        final String errorMessage = ""unable to find pending row for "" + operationToRemove;
+        Log.e(TAG, errorMessage, new IllegalStateException(errorMessage));
+    }
+    if (DEBUG_CHECK_DATA_CONSISTENCY)
+        debugCheckDataStructures(true);
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,2,2,"The exception handling statement has changed. In the early version, an IllegalStateException is thrown when mSyncStorageEngine.deleteFromPending(operationToRemove.pendingOperation) returns false. In the late version, rather than throwing an exception, an error message is logged. So the code change type is 2.","Since the method of handling exceptions has changed from throwing an exception to logging an error, the API may behave differently when mSyncStorageEngine.deleteFromPending(operationToRemove.pendingOperation) returns false. In this case, the CI type is 2."
+36,<android.widget.PopupWindow.PopupViewContainer: boolean dispatchKeyEvent(KeyEvent)>,5,6,<android.widget.PopupWindow.PopupViewContainer: boolean dispatchKeyEvent(KeyEvent)>,<android.widget.PopupWindow.PopupViewContainer: boolean dispatchKeyEvent(KeyEvent)>,0,"{
+    if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
+            getKeyDispatcherState().startTracking(event, this);
+            return true;
+        } else if (event.getAction() == KeyEvent.ACTION_UP && event.isTracking() && !event.isCanceled()) {
+            dismiss();
+            return true;
+        }
+        return super.dispatchKeyEvent(event);
+    } else {
+        return super.dispatchKeyEvent(event);
+    }
+}","{
+    if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
+            getKeyDispatcherState().startTracking(event, this);
+            return true;
+        } else if (event.getAction() == KeyEvent.ACTION_UP && getKeyDispatcherState().isTracking(event) && !event.isCanceled()) {
+            dismiss();
+            return true;
+        }
+        return super.dispatchKeyEvent(event);
+    } else {
+        return super.dispatchKeyEvent(event);
+    }
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,"4,5",1,"In the late implementation, the method event.isTracking() has been replaced by getKeyDispatcherState().isTracking(event). This change is not a control dependency change, but rather a change in the method invocations, a ""Dependent API changed"" (5) and ""Other statement changed"" (4).","The replacement of event.isTracking() to getKeyDispatcherState().isTracking(event) could potentially affect the return value of the dispatchKeyEvent function, thus Compatibility Issue is 1, i.e., ""potential different return values""."
+37,"<android.pim.vcard.VCardComposer: String composeVCardForPhoneOwnNumber(int,String,String,boolean)>",5,6,"<android.pim.vcard.VCardComposer: String composeVCardForPhoneOwnNumber(int,String,String,boolean)>","<android.pim.vcard.VCardComposer: String composeVCardForPhoneOwnNumber(int,String,String,boolean)>",0,"{
+    final StringBuilder builder = new StringBuilder();
+    appendVCardLine(builder, VCARD_PROPERTY_BEGIN, VCARD_DATA_VCARD);
+    if (!vcardVer21) {
+        appendVCardLine(builder, VCARD_PROPERTY_VERSION, Constants.VERSION_V30);
+    } else {
+        appendVCardLine(builder, VCARD_PROPERTY_VERSION, Constants.VERSION_V21);
+    }
+    boolean needCharset = false;
+    if (!(VCardUtils.containsOnlyPrintableAscii(phoneName))) {
+        needCharset = true;
+    }
+    // TODO: QP should be used? Using mUsesQPToPrimaryProperties should help.
+    appendVCardLine(builder, VCARD_PROPERTY_FULL_NAME, phoneName, needCharset, false);
+    appendVCardLine(builder, VCARD_PROPERTY_NAME, phoneName, needCharset, false);
+    String label = Integer.toString(phonetype);
+    appendVCardTelephoneLine(builder, phonetype, label, phoneNumber);
+    appendVCardLine(builder, VCARD_PROPERTY_END, VCARD_DATA_VCARD);
+    return builder.toString();
+}","{
+    final StringBuilder builder = new StringBuilder();
+    appendVCardLine(builder, VCARD_PROPERTY_BEGIN, VCARD_DATA_VCARD);
+    if (!vcardVer21) {
+        appendVCardLine(builder, VCARD_PROPERTY_VERSION, Constants.VERSION_V30);
+    } else {
+        appendVCardLine(builder, VCARD_PROPERTY_VERSION, Constants.VERSION_V21);
+    }
+    boolean needCharset = false;
+    if (!(VCardUtils.containsOnlyPrintableAscii(phoneName))) {
+        needCharset = true;
+    }
+    // TODO: QP should be used? Using mUsesQPToPrimaryProperties should help.
+    appendVCardLine(builder, VCARD_PROPERTY_FULL_NAME, phoneName, needCharset, false);
+    appendVCardLine(builder, VCARD_PROPERTY_NAME, phoneName, needCharset, false);
+    if (!TextUtils.isEmpty(phoneNumber)) {
+        String label = Integer.toString(phonetype);
+        appendVCardTelephoneLine(builder, phonetype, label, phoneNumber);
+    }
+    appendVCardLine(builder, VCARD_PROPERTY_END, VCARD_DATA_VCARD);
+    return builder.toString();
+}",1,"/**
+ * This static function is to compose vCard for phone own number
+ */
+","/**
+ * This static function is to compose vCard for phone own number
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,3,1,"The change occurred in 'if' control flow related to the statement 'appendVCardTelephoneLine'. In the early version, the 'appendVCardTelephoneLine' method call is directly invoked while in the late version this method is surrounded by an 'if' statement (if (!TextUtils.isEmpty(phoneNumber))). So, the code change type is 3.","The added condition before the method 'appendVCardTelephoneLine' could potentially change the return value of the method, thus a compatibility issue of type 1 could occur."
+38,<android.content.SyncManager.SyncQueue: void popHead()>,5,6,<android.content.SyncManager.SyncQueue: void popHead()>,<android.content.SyncManager.SyncQueue: void popHead()>,0,"{
+    if (DEBUG_CHECK_DATA_CONSISTENCY)
+        debugCheckDataStructures(true);
+    SyncOperation operation = mOpsByWhen.remove();
+    if (mOpsByKey.remove(operation.key) == null) {
+        throw new IllegalStateException(""unable to find "" + operation + "" in mOpsByKey"");
+    }
+    if (!mSyncStorageEngine.deleteFromPending(operation.pendingOperation)) {
+        throw new IllegalStateException(""unable to find pending row for "" + operation);
+    }
+    if (DEBUG_CHECK_DATA_CONSISTENCY)
+        debugCheckDataStructures(true);
+}","{
+    if (DEBUG_CHECK_DATA_CONSISTENCY)
+        debugCheckDataStructures(true);
+    SyncOperation operation = mOpsByWhen.remove();
+    if (mOpsByKey.remove(operation.key) == null) {
+        throw new IllegalStateException(""unable to find "" + operation + "" in mOpsByKey"");
+    }
+    if (!mSyncStorageEngine.deleteFromPending(operation.pendingOperation)) {
+        final String errorMessage = ""unable to find pending row for "" + operation;
+        Log.e(TAG, errorMessage, new IllegalStateException(errorMessage));
+    }
+    if (DEBUG_CHECK_DATA_CONSISTENCY)
+        debugCheckDataStructures(true);
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,2,2,"The way exceptions are handled has changed from 'throw' statement to 'Log.e', so the code change type is 2.","In the earlier version, there would be an IllegalStateException thrown if the program fails to find a pending row for 'operation', however, in the late version, there will be an error message logged instead of an exception thrown, and thus there will be different exception handlings, causing the CI type to be 2."
+40,"<android.accounts.AccountManager: AccountManagerFuture<Bundle> getAuthTokenByFeatures(String,String,String[],Activity,Bundle,Bundle,AccountManagerCallback<Bundle>,Handler)>",5,6,"<android.accounts.AccountManager: AccountManagerFuture<Bundle> getAuthTokenByFeatures(String,String,String[],Activity,Bundle,Bundle,AccountManagerCallback<Bundle>,Handler)>","<android.accounts.AccountManager: AccountManagerFuture<Bundle> getAuthTokenByFeatures(String,String,String[],Activity,Bundle,Bundle,AccountManagerCallback<Bundle>,Handler)>",0,"{
+    if (accountType == null)
+        throw new IllegalArgumentException(""account type is null"");
+    if (authTokenType == null)
+        throw new IllegalArgumentException(""authTokenType is null"");
+    final GetAuthTokenByTypeAndFeaturesTask task = new GetAuthTokenByTypeAndFeaturesTask(accountType, authTokenType, features, activityForPrompting, addAccountOptions, loginOptions, callback, handler);
+    task.start();
+    return task;
+}","{
+    if (accountType == null)
+        throw new IllegalArgumentException(""account type is null"");
+    if (authTokenType == null)
+        throw new IllegalArgumentException(""authTokenType is null"");
+    final GetAuthTokenByTypeAndFeaturesTask task = new GetAuthTokenByTypeAndFeaturesTask(accountType, authTokenType, features, activityForPrompting, addAccountOptions, getAuthTokenOptions, callback, handler);
+    task.start();
+    return task;
+}",1,,"/**
+ * Convenience method that combines the functionality of {@link #getAccountsByTypeAndFeatures},
+ * {@link #getAuthToken(Account, String, Bundle, Activity, AccountManagerCallback, Handler)},
+ * and {@link #addAccount}. It first gets the list of accounts that match accountType and the
+ * feature set. If there are none then {@link #addAccount} is invoked with the authTokenType
+ * feature set, and addAccountOptions. If there is exactly one then
+ * {@link #getAuthToken(Account, String, Bundle, Activity, AccountManagerCallback, Handler)} is
+ * called with that account. If there are more than one then a chooser activity is launched
+ * to prompt the user to select one of them and then the authtoken is retrieved for it,
+ * <p>
+ * This call returns immediately but runs asynchronously and the result is accessed via the
+ * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
+ * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
+ * method asynchronously then they will generally pass in a callback object that will get
+ * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
+ * they will generally pass null for the callback and instead call
+ * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
+ * which will then block until the request completes.
+ * <p>
+ * Requires that the caller has permission {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+ *
+ * @param accountType the accountType to query; this must be non-null
+ * @param authTokenType the type of authtoken to retrieve; this must be non-null
+ * @param features a filter for the accounts. See {@link #getAccountsByTypeAndFeatures}.
+ * @param activityForPrompting The activity used to start any account management
+ * activities that are required to fulfill this request. This may be null.
+ * @param addAccountOptions authenticator-specific options used if an account needs to be added
+ * @param getAuthTokenOptions authenticator-specific options passed to getAuthToken
+ * @param callback A callback to invoke when the request completes. If null then
+ * no callback is invoked.
+ * @param handler The {@link Handler} to use to invoke the callback. If null then the
+ * main thread's {@link Handler} is used.
+ * @return an {@link AccountManagerFuture} that represents the future result of the call.
+ * The future result is a {@link Bundle} that contains either:
+ * <ul>
+ * <li> {@link #KEY_INTENT}, if no activity is supplied yet an activity needs to launched to
+ * fulfill the request.
+ * <li> {@link #KEY_ACCOUNT_NAME}, {@link #KEY_ACCOUNT_TYPE} and {@link #KEY_AUTHTOKEN} if the
+ * request completes successfully.
+ * </ul>
+ * If the user presses ""back"" then the request will be canceled.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,4,0,"The name of the parameter of the GetAuthTokenByTypeAndFeaturesTask constructor has changed from loginOptions to getAuthTokenOptions. Therefore, the code change type is 4 (Other statement changed).","Despite the name of the parameter of the GetAuthTokenByTypeAndFeaturesTask constructor has changed from loginOptions to getAuthTokenOptions in the late version, there is no change in the type, the number of parameters and the functionality. Hence, this does not affect the behavior of the API. As such, there is no compatibility issue, so CI = 0."
+41,<android.server.BluetoothA2dpService: boolean resumeSink(BluetoothDevice)>,5,6,<android.server.BluetoothA2dpService: boolean resumeSink(BluetoothDevice)>,<android.server.BluetoothA2dpService: boolean resumeSink(BluetoothDevice)>,0,"{
+    mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM, ""Need BLUETOOTH_ADMIN permission"");
+    if (DBG)
+        log(""resumeSink("" + device + ""), mResuming: "" + mResuming + "", mSuspending: "" + mSuspending);
+    if (mResuming) {
+        return true;
+    }
+    if (device == null || mAudioDevices == null) {
+        return false;
+    }
+    String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
+    Integer state = mAudioDevices.get(device);
+    if (path == null || state == null) {
+        return false;
+    }
+    switch(state.intValue()) {
+        case BluetoothA2dp.STATE_PLAYING:
+            if (mSuspending) {
+                mResuming = true;
+            }
+            return true;
+        case BluetoothA2dp.STATE_CONNECTED:
+            mResuming = resumeSinkNative(path);
+            mAudioManager.setParameters(""A2dpSuspended=false"");
+            return mResuming;
+        default:
+            return false;
+    }
+}","{
+    mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM, ""Need BLUETOOTH_ADMIN permission"");
+    if (DBG)
+        log(""resumeSink("" + device + ""), mTargetA2dpState: "" + mTargetA2dpState);
+    if (device == null || mAudioDevices == null) {
+        return false;
+    }
+    String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
+    Integer state = mAudioDevices.get(device);
+    if (path == null || state == null) {
+        return false;
+    }
+    mTargetA2dpState = BluetoothA2dp.STATE_PLAYING;
+    return checkSinkSuspendState(state.intValue());
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"1,3",1,"The 'if' condition checking for 'mResuming' has been removed, and the 'switch' statement was removed and replaced with two new assignments and a call to a different method 'checkSinkSuspendState(state.intValue())'. This makes the change types 1 for return statement changes, and 3 for control dependency changes.","The removal of the 'if' condition and the 'switch' statement changes the control flow and thus potentially changes the result of this method. Specifically, the function now always changes 'mTargetA2dpState' and returns 'checkSinkSuspendState(state.intValue())', which could cause the function to return different values between the two versions. Therefore, the CI type is 1 for potential different return values."
+42,<android.app.WallpaperManager: void clearWallpaperOffsets(IBinder)>,5,6,<android.app.WallpaperManager: void clearWallpaperOffsets(IBinder)>,<android.app.WallpaperManager: void clearWallpaperOffsets(IBinder)>,0,"{
+    try {
+        ViewRoot.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(windowToken, -1, -1);
+    } catch (RemoteException e) {
+    // Ignore.
+    }
+}","{
+    try {
+        ViewRoot.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(windowToken, -1, -1, -1, -1);
+    } catch (RemoteException e) {
+    // Ignore.
+    }
+}",1,"/**
+ * Clear the offsets previously associated with this window through
+ * {@link #setWallpaperOffsets(IBinder, float, float)}.  This reverts
+ * the window to its default state, where it does not cause the wallpaper
+ * to scroll from whatever its last offsets were.
+ *
+ * @param windowToken The window who these offsets should be associated
+ * with, as returned by {@link android.view.View#getWindowToken()
+ * View.getWindowToken()}.
+ */
+","/**
+ * Clear the offsets previously associated with this window through
+ * {@link #setWallpaperOffsets(IBinder, float, float)}.  This reverts
+ * the window to its default state, where it does not cause the wallpaper
+ * to scroll from whatever its last offsets were.
+ *
+ * @param windowToken The window who these offsets should be associated
+ * with, as returned by {@link android.view.View#getWindowToken()
+ * View.getWindowToken()}.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"4,5",0,"The method setWallpaperPosition() has changed from receiving three parameters to five parameters, so the code change type is 4,5.","As this change only modifies the parameters of the method without changing the return value or the exception handling, there is no compatibility issue. Hence, the CI type is 0."
+43,<android.content.res.AssetManager: AssetFileDescriptor openFd(String)>,5,6,<android.content.res.AssetManager: AssetFileDescriptor openFd(String)>,<android.content.res.AssetManager: AssetFileDescriptor openFd(String)>,0,"{
+    synchronized (mSync) {
+        if (!mOpen) {
+            throw new RuntimeException(""Assetmanager has been closed"");
+        }
+        ParcelFileDescriptor pfd = openAssetFd(fileName, mOffsets);
+        if (pfd != null) {
+            return new AssetFileDescriptor(pfd, mOffsets[0], mOffsets[1]);
+        }
+    }
+    throw new FileNotFoundException(""Asset file: "" + fileName);
+}","{
+    synchronized (this) {
+        if (!mOpen) {
+            throw new RuntimeException(""Assetmanager has been closed"");
+        }
+        ParcelFileDescriptor pfd = openAssetFd(fileName, mOffsets);
+        if (pfd != null) {
+            return new AssetFileDescriptor(pfd, mOffsets[0], mOffsets[1]);
+        }
+    }
+    throw new FileNotFoundException(""Asset file: "" + fileName);
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,4,0,"The synchronization statement has changed from 'synchronized (mSync)' to 'synchronized (this)', so the code change type is 4 (Other statement changed).","Despite the change in the synchronization block, the behavior and output of the method would remain the same. Therefore, the change does not lead to a Compatibility Issue and the CI type is 0."
+44,"<android.webkit.WebView: boolean onKeyUp(int,KeyEvent)>",5,6,"<android.webkit.WebView: boolean onKeyUp(int,KeyEvent)>","<android.webkit.WebView: boolean onKeyUp(int,KeyEvent)>",0,"{
+    if (DebugFlags.WEB_VIEW) {
+        Log.v(LOGTAG, ""keyUp at "" + System.currentTimeMillis() + "", "" + event + "", unicode="" + event.getUnicodeChar());
+    }
+    if (mNativeClass == 0) {
+        return false;
+    }
+    // special CALL handling when cursor node's href is ""tel:XXX""
+    if (keyCode == KeyEvent.KEYCODE_CALL && nativeHasCursorNode()) {
+        String text = nativeCursorText();
+        if (!nativeCursorIsTextInput() && text != null && text.startsWith(SCHEME_TEL)) {
+            Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse(text));
+            getContext().startActivity(intent);
+            return true;
+        }
+    }
+    // 2. the host application wants to handle it;
+    if (event.isSystem() || mCallbackProxy.uiOverrideKeyEvent(event)) {
+        return false;
+    }
+    if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
+        if (commitCopy()) {
+            return true;
+        }
+    }
+    if (keyCode >= KeyEvent.KEYCODE_DPAD_UP && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
+        // Bubble up the key event as WebView doesn't handle it
+        return false;
+    }
+    if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+        // remove the long press message first
+        mPrivateHandler.removeMessages(LONG_PRESS_CENTER);
+        mGotCenterDown = false;
+        if (mShiftIsPressed) {
+            return false;
+        }
+        // perform the single click
+        Rect visibleRect = sendOurVisibleRect();
+        // coordinates should be in content coordinates.
+        if (!nativeCursorIntersects(visibleRect)) {
+            return false;
+        }
+        nativeSetFollowedLink(true);
+        nativeUpdatePluginReceivesEvents();
+        WebViewCore.CursorData data = cursorData();
+        mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, data);
+        playSoundEffect(SoundEffectConstants.CLICK);
+        boolean isTextInput = nativeCursorIsTextInput();
+        if (isTextInput || !mCallbackProxy.uiOverrideUrlLoading(nativeCursorText())) {
+            mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame, nativeCursorNodePointer());
+        }
+        if (isTextInput) {
+            rebuildWebTextView();
+        }
+        return true;
+    }
+    // TODO: should we pass all the keys to DOM or check the meta tag
+    if (nativeCursorWantsKeyEvents() || true) {
+        // pass the key to DOM
+        mWebViewCore.sendMessage(EventHub.KEY_UP, event);
+        // return true as DOM handles the key
+        return true;
+    }
+    // Bubble up the key event as WebView doesn't handle it
+    return false;
+}","{
+    if (DebugFlags.WEB_VIEW) {
+        Log.v(LOGTAG, ""keyUp at "" + System.currentTimeMillis() + "", "" + event + "", unicode="" + event.getUnicodeChar());
+    }
+    if (mNativeClass == 0) {
+        return false;
+    }
+    // special CALL handling when cursor node's href is ""tel:XXX""
+    if (keyCode == KeyEvent.KEYCODE_CALL && nativeHasCursorNode()) {
+        String text = nativeCursorText();
+        if (!nativeCursorIsTextInput() && text != null && text.startsWith(SCHEME_TEL)) {
+            Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse(text));
+            getContext().startActivity(intent);
+            return true;
+        }
+    }
+    // 2. the host application wants to handle it;
+    if (event.isSystem() || mCallbackProxy.uiOverrideKeyEvent(event)) {
+        return false;
+    }
+    if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
+        if (commitCopy()) {
+            return true;
+        }
+    }
+    if (keyCode >= KeyEvent.KEYCODE_DPAD_UP && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
+        // Bubble up the key event as WebView doesn't handle it
+        return false;
+    }
+    if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+        // remove the long press message first
+        mPrivateHandler.removeMessages(LONG_PRESS_CENTER);
+        mGotCenterDown = false;
+        if (mShiftIsPressed) {
+            return false;
+        }
+        // perform the single click
+        Rect visibleRect = sendOurVisibleRect();
+        // coordinates should be in content coordinates.
+        if (!nativeCursorIntersects(visibleRect)) {
+            return false;
+        }
+        nativeSetFollowedLink(true);
+        nativeUpdatePluginReceivesEvents();
+        WebViewCore.CursorData data = cursorData();
+        mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, data);
+        playSoundEffect(SoundEffectConstants.CLICK);
+        boolean isTextInput = nativeCursorIsTextInput();
+        if (isTextInput || !mCallbackProxy.uiOverrideUrlLoading(nativeCursorText())) {
+            mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame, nativeCursorNodePointer());
+        }
+        if (isTextInput) {
+            rebuildWebTextView();
+            displaySoftKeyboard(true);
+        }
+        return true;
+    }
+    // TODO: should we pass all the keys to DOM or check the meta tag
+    if (nativeCursorWantsKeyEvents() || true) {
+        // pass the key to DOM
+        mWebViewCore.sendMessage(EventHub.KEY_UP, event);
+        // return true as DOM handles the key
+        return true;
+    }
+    // Bubble up the key event as WebView doesn't handle it
+    return false;
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,4,1,"A new statement 'displaySoftKeyboard(true);' has been added to the implementation in the late version, so the change type is 4.","The addition of the 'displaySoftKeyboard(true);' statement can lead to different behavior in the late version, hence the CI type is 1 as this may affect the potential return value of the method."
+45,<android.content.pm.RegisteredServicesCache.ServiceInfo: String toString()>,5,6,<android.content.pm.RegisteredServicesCache.ServiceInfo: String toString()>,<android.content.pm.RegisteredServicesCache.ServiceInfo: String toString()>,0,"{
+    return ""ServiceInfo: "" + type + "", "" + componentName;
+}","{
+    return ""ServiceInfo: "" + type + "", "" + componentName + "", uid "" + uid;
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,1,1,"The return statement has changed as it includes an additional string ""uid "" + uid in the late version compared to the early version. Therefore, the code change type is 1.","As the return statement is different between the two versions, the API could potentially return a different value, thus the CI type is 1."
+46,"<android.content.res.AssetManager: InputStream open(String,int)>",5,6,"<android.content.res.AssetManager: InputStream open(String,int)>","<android.content.res.AssetManager: InputStream open(String,int)>",0,"{
+    synchronized (mSync) {
+        if (!mOpen) {
+            throw new RuntimeException(""Assetmanager has been closed"");
+        }
+        int asset = openAsset(fileName, accessMode);
+        if (asset != 0) {
+            mNumRefs++;
+            return new AssetInputStream(asset);
+        }
+    }
+    throw new FileNotFoundException(""Asset file: "" + fileName);
+}","{
+    synchronized (this) {
+        if (!mOpen) {
+            throw new RuntimeException(""Assetmanager has been closed"");
+        }
+        int asset = openAsset(fileName, accessMode);
+        if (asset != 0) {
+            mNumRefs++;
+            return new AssetInputStream(asset);
+        }
+    }
+    throw new FileNotFoundException(""Asset file: "" + fileName);
+}",1,"/**
+ * Open an asset using an explicit access mode, returning an InputStream to
+ * read its contents.  This provides access to files that have been bundled
+ * with an application as assets -- that is, files placed in to the
+ * ""assets"" directory.
+ *
+ * @param fileName The name of the asset to open.  This name can be
+ * hierarchical.
+ * @param accessMode Desired access mode for retrieving the data.
+ *
+ * @see #ACCESS_UNKNOWN
+ * @see #ACCESS_STREAMING
+ * @see #ACCESS_RANDOM
+ * @see #ACCESS_BUFFER
+ * @see #open(String)
+ * @see #list
+ */
+","/**
+ * Open an asset using an explicit access mode, returning an InputStream to
+ * read its contents.  This provides access to files that have been bundled
+ * with an application as assets -- that is, files placed in to the
+ * ""assets"" directory.
+ *
+ * @param fileName The name of the asset to open.  This name can be
+ * hierarchical.
+ * @param accessMode Desired access mode for retrieving the data.
+ *
+ * @see #ACCESS_UNKNOWN
+ * @see #ACCESS_STREAMING
+ * @see #ACCESS_RANDOM
+ * @see #ACCESS_BUFFER
+ * @see #open(String)
+ * @see #list
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,4,0,"The synchronized (mSync) has been changed to synchronized (this), which means the synchronization object has changed, hence the code change is classified into category 4: Other statement changed.","Although there is a change in the code, this change does not affect the return variable or exception handling of the API. Therefore, no Compatibility Issue (CI) exists in this case."
+47,<android.accounts.AccountManager: void clearPassword(Account)>,5,6,<android.accounts.AccountManager: void clearPassword(Account)>,<android.accounts.AccountManager: void clearPassword(Account)>,0,"{
+    try {
+        mService.clearPassword(account);
+    } catch (RemoteException e) {
+        // won't ever happen
+        throw new RuntimeException(e);
+    }
+}","{
+    if (account == null) {
+        Log.e(TAG, ""the account must not be null"");
+        return;
+    }
+    try {
+        mService.clearPassword(account);
+    } catch (RemoteException e) {
+        // won't ever happen
+        throw new RuntimeException(e);
+    }
+}",1,,"/**
+ * Sets the password for account to null. If the account does not exist then this call
+ * has no effect.
+ * <p>
+ * Requires that the caller has permission {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+ * @param account the account whose password is to be cleared. Must not be null.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"3,4",2,"In the late version, an 'if' condition is introduced and an 'Log.e', which is a statement of logging error, and a 'return' statement is added under that condition, so the code change type is 3,4.","The account null-check introduced in the late version may bypass the following 'try-catch' block, preventing the 'RuntimeException' from being thrown at the same time, which leads to different exception handling, so the CI type is 2."
+48,<android.hardware.Camera.EventHandler: void handleMessage(Message)>,5,6,<android.hardware.Camera.EventHandler: void handleMessage(Message)>,<android.hardware.Camera.EventHandler: void handleMessage(Message)>,0,"{
+    switch(msg.what) {
+        case CAMERA_MSG_SHUTTER:
+            if (mShutterCallback != null) {
+                mShutterCallback.onShutter();
+            }
+            return;
+        case CAMERA_MSG_RAW_IMAGE:
+            if (mRawImageCallback != null) {
+                mRawImageCallback.onPictureTaken((byte[]) msg.obj, mCamera);
+            }
+            return;
+        case CAMERA_MSG_COMPRESSED_IMAGE:
+            if (mJpegCallback != null) {
+                mJpegCallback.onPictureTaken((byte[]) msg.obj, mCamera);
+            }
+            return;
+        case CAMERA_MSG_PREVIEW_FRAME:
+            if (mPreviewCallback != null) {
+                PreviewCallback cb = mPreviewCallback;
+                if (mOneShot) {
+                    // Clear the callback variable before the callback
+                    // in case the app calls setPreviewCallback from
+                    // the callback function
+                    mPreviewCallback = null;
+                } else {
+                    // We're faking the camera preview mode to prevent
+                    // the app from being flooded with preview frames.
+                    // Set to oneshot mode again.
+                    setHasPreviewCallback(true, true);
+                }
+                cb.onPreviewFrame((byte[]) msg.obj, mCamera);
+            }
+            return;
+        case CAMERA_MSG_POSTVIEW_FRAME:
+            if (mPostviewCallback != null) {
+                mPostviewCallback.onPictureTaken((byte[]) msg.obj, mCamera);
+            }
+            return;
+        case CAMERA_MSG_FOCUS:
+            if (mAutoFocusCallback != null) {
+                mAutoFocusCallback.onAutoFocus(msg.arg1 == 0 ? false : true, mCamera);
+            }
+            return;
+        case CAMERA_MSG_ZOOM:
+            if (mZoomCallback != null) {
+                mZoomCallback.onZoomUpdate(msg.arg1, msg.arg2 != 0, mCamera);
+            }
+            return;
+        case CAMERA_MSG_ERROR:
+            Log.e(TAG, ""Error "" + msg.arg1);
+            if (mErrorCallback != null) {
+                mErrorCallback.onError(msg.arg1, mCamera);
+            }
+            return;
+        default:
+            Log.e(TAG, ""Unknown message type "" + msg.what);
+            return;
+    }
+}","{
+    switch(msg.what) {
+        case CAMERA_MSG_SHUTTER:
+            if (mShutterCallback != null) {
+                mShutterCallback.onShutter();
+            }
+            return;
+        case CAMERA_MSG_RAW_IMAGE:
+            if (mRawImageCallback != null) {
+                mRawImageCallback.onPictureTaken((byte[]) msg.obj, mCamera);
+            }
+            return;
+        case CAMERA_MSG_COMPRESSED_IMAGE:
+            if (mJpegCallback != null) {
+                mJpegCallback.onPictureTaken((byte[]) msg.obj, mCamera);
+            }
+            return;
+        case CAMERA_MSG_PREVIEW_FRAME:
+            if (mPreviewCallback != null) {
+                PreviewCallback cb = mPreviewCallback;
+                if (mOneShot) {
+                    // Clear the callback variable before the callback
+                    // in case the app calls setPreviewCallback from
+                    // the callback function
+                    mPreviewCallback = null;
+                } else if (!mWithBuffer) {
+                    // We're faking the camera preview mode to prevent
+                    // the app from being flooded with preview frames.
+                    // Set to oneshot mode again.
+                    setHasPreviewCallback(true, false);
+                }
+                cb.onPreviewFrame((byte[]) msg.obj, mCamera);
+            }
+            return;
+        case CAMERA_MSG_POSTVIEW_FRAME:
+            if (mPostviewCallback != null) {
+                mPostviewCallback.onPictureTaken((byte[]) msg.obj, mCamera);
+            }
+            return;
+        case CAMERA_MSG_FOCUS:
+            if (mAutoFocusCallback != null) {
+                mAutoFocusCallback.onAutoFocus(msg.arg1 == 0 ? false : true, mCamera);
+            }
+            return;
+        case CAMERA_MSG_ZOOM:
+            if (mZoomCallback != null) {
+                mZoomCallback.onZoomUpdate(msg.arg1, msg.arg2 != 0, mCamera);
+            }
+            return;
+        case CAMERA_MSG_ERROR:
+            Log.e(TAG, ""Error "" + msg.arg1);
+            if (mErrorCallback != null) {
+                mErrorCallback.onError(msg.arg1, mCamera);
+            }
+            return;
+        default:
+            Log.e(TAG, ""Unknown message type "" + msg.what);
+            return;
+    }
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,3,1,a conditional check `mWithBuffer` is added inside the case CAMERA_MSG_PREVIEW_FRAME so the code change type will be 3(Control dependency changed).,"As the new condition check modifies how the function `setHasPreviewCallback(true, true/fasle)` is executed, this will potentially affect the return result and will lead to compatibility issue type 1(Return statement changed)."
+50,<android.os.PowerManager.WakeLock: void finalize()>,5,6,<android.os.PowerManager.WakeLock: void finalize()>,<android.os.PowerManager.WakeLock: void finalize()>,0,"{
+    synchronized (mToken) {
+        if (mHeld) {
+            try {
+                mService.releaseWakeLock(mToken);
+            } catch (RemoteException e) {
+            }
+            RuntimeInit.crash(TAG, new Exception(""WakeLock finalized while still held: "" + mTag));
+        }
+    }
+}","{
+    synchronized (mToken) {
+        if (mHeld) {
+            try {
+                mService.releaseWakeLock(mToken, 0);
+            } catch (RemoteException e) {
+            }
+            RuntimeInit.crash(TAG, new Exception(""WakeLock finalized while still held: "" + mTag));
+        }
+    }
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,"1,5",0,"The dependent API has changed from mService.releaseWakeLock(mToken) to mService.releaseWakeLock(mToken, 0) and a new parameter has been added. So, the code change type is 1,5.","Even though the dependent API has change, it does not seem to affect the output of the finalized() method and does not cause the API to return a different variable or throw an exception differently. Thus, there are no Compatibility Issues (CI type 0)."
+51,<android.accounts.AccountManager: void removeOnAccountsUpdatedListener(OnAccountsUpdateListener)>,5,6,<android.accounts.AccountManager: void removeOnAccountsUpdatedListener(OnAccountsUpdateListener)>,<android.accounts.AccountManager: void removeOnAccountsUpdatedListener(OnAccountsUpdateListener)>,0,"{
+    if (listener == null) {
+        throw new IllegalArgumentException(""the listener is null"");
+    }
+    synchronized (mAccountsUpdatedListeners) {
+        if (!mAccountsUpdatedListeners.containsKey(listener)) {
+            throw new IllegalStateException(""this listener was not previously added"");
+        }
+        mAccountsUpdatedListeners.remove(listener);
+        if (mAccountsUpdatedListeners.isEmpty()) {
+            mContext.unregisterReceiver(mAccountsChangedBroadcastReceiver);
+        }
+    }
+}","{
+    if (listener == null) {
+        Log.e(TAG, ""Missing listener"");
+        return;
+    }
+    synchronized (mAccountsUpdatedListeners) {
+        if (!mAccountsUpdatedListeners.containsKey(listener)) {
+            Log.e(TAG, ""Listener was not previously added"");
+            return;
+        }
+        mAccountsUpdatedListeners.remove(listener);
+        if (mAccountsUpdatedListeners.isEmpty()) {
+            mContext.unregisterReceiver(mAccountsChangedBroadcastReceiver);
+        }
+    }
+}",1,"/**
+ * Remove an {@link OnAccountsUpdateListener} that was previously registered with
+ * {@link #addOnAccountsUpdatedListener}.
+ * @param listener the listener to remove
+ * @throws IllegalArgumentException if listener is null
+ * @throws IllegalStateException if listener was not already added
+ */
+","/**
+ * Remove an {@link OnAccountsUpdateListener} that was previously registered with
+ * {@link #addOnAccountsUpdatedListener}.
+ * @param listener the listener to remove
+ * @throws IllegalArgumentException if listener is null
+ * @throws IllegalStateException if listener was not already added
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"2,4","1,2","The exception handling mechanism changed from a ""throw"" to a log and return, and this constitutes a change in both exception handling statements and other statements, hence the code change type is 2,4.","The change in the exception handling could cause the method to throw different exceptions when running the same client code with the same input. Also, the presence of return statements where previously there were none could cause the method to terminate prematurely compared to older versions, potentially resulting in different returned values or types as well. Thus, the compatibility issue type is 1,2."
+53,"<android.accounts.AccountManager: AccountManagerFuture<Bundle> updateCredentials(Account,String,Bundle,Activity,AccountManagerCallback<Bundle>,Handler)>",5,6,"<android.accounts.AccountManager: AccountManagerFuture<Bundle> updateCredentials(Account,String,Bundle,Activity,AccountManagerCallback<Bundle>,Handler)>","<android.accounts.AccountManager: AccountManagerFuture<Bundle> updateCredentials(Account,String,Bundle,Activity,AccountManagerCallback<Bundle>,Handler)>",0,"{
+    return new AmsTask(activity, handler, callback) {
+
+        public void doWork() throws RemoteException {
+            mService.updateCredentials(mResponse, account, authTokenType, activity != null, loginOptions);
+        }
+    }.start();
+}","{
+    return new AmsTask(activity, handler, callback) {
+
+        public void doWork() throws RemoteException {
+            mService.updateCredentials(mResponse, account, authTokenType, activity != null, options);
+        }
+    }.start();
+}",1,,"/**
+ * Requests that the authenticator update the the credentials for a user. This is typically
+ * done by returning an intent to an activity that will prompt the user to update the stored
+ * credentials for the account. This request
+ * is processed by the authenticator for the account. If no matching authenticator is
+ * registered in the system then {@link AuthenticatorException} is thrown.
+ * <p>
+ * This call returns immediately but runs asynchronously and the result is accessed via the
+ * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
+ * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
+ * method asynchronously then they will generally pass in a callback object that will get
+ * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
+ * they will generally pass null for the callback and instead call
+ * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
+ * which will then block until the request completes.
+ * <p>
+ * Requires that the caller has permission {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+ *
+ * @param account The account whose credentials are to be updated.
+ * @param authTokenType the auth token to retrieve as part of updating the credentials.
+ * May be null.
+ * @param options authenticator specific options for the request
+ * @param activity If the authenticator returns a {@link #KEY_INTENT} in the result then
+ * the intent will be started with this activity. If activity is null then the result will
+ * be returned as-is.
+ * @param callback A callback to invoke when the request completes. If null then
+ * no callback is invoked.
+ * @param handler The {@link Handler} to use to invoke the callback. If null then the
+ * main thread's {@link Handler} is used.
+ * @return an {@link AccountManagerFuture} that represents the future result of the call.
+ * The future result is a {@link Bundle} that contains either:
+ * <ul>
+ * <li> {@link #KEY_INTENT}, which is to be used to prompt the user for the credentials
+ * <li> {@link #KEY_ACCOUNT_NAME} and {@link #KEY_ACCOUNT_TYPE} if the user enters the correct
+ * credentials, and optionally a {@link #KEY_AUTHTOKEN} if an authTokenType was provided.
+ * </ul>
+ * If the user presses ""back"" then the request will be canceled.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"4,5",1,"The parameters of the mService.updateCredentials() method have changed, with 'loginOptions' replaced by 'options', hence the change type is 4,5.","As the parameter of the dependent API is changed, the return value of the final API may also differ, leading to the CI type 1."
+55,"<android.content.res.AssetManager: CharSequence getResourceBagText(int,int)>",5,6,"<android.content.res.AssetManager: CharSequence getResourceBagText(int,int)>","<android.content.res.AssetManager: CharSequence getResourceBagText(int,int)>",0,"{
+    synchronized (mSync) {
+        TypedValue tmpValue = mValue;
+        int block = loadResourceBagValue(ident, bagEntryId, tmpValue, true);
+        if (block >= 0) {
+            if (tmpValue.type == TypedValue.TYPE_STRING) {
+                return mStringBlocks[block].get(tmpValue.data);
+            }
+            return tmpValue.coerceToString();
+        }
+    }
+    return null;
+}","{
+    synchronized (this) {
+        TypedValue tmpValue = mValue;
+        int block = loadResourceBagValue(ident, bagEntryId, tmpValue, true);
+        if (block >= 0) {
+            if (tmpValue.type == TypedValue.TYPE_STRING) {
+                return mStringBlocks[block].get(tmpValue.data);
+            }
+            return tmpValue.coerceToString();
+        }
+    }
+    return null;
+}",1,"/*package*/
+","/*package*/
+",-1,,,-1,-1,-1,-1,-1,-1,3,0,"The only change is the synchronized statement's parameter: from `mSync` to `this`. Thus, the code change type is 3 (Control dependency change).","Even though the synchronized block's parameter has changed, the resource bag text is still derived from the same logic and return statements. Therefore, the API behavior has not changed in the two versions which means that there is no Compatibility Issue (Category 0)."
+56,<android.pim.vcard.VCardParser_V21: boolean parseItem()>,5,6,<android.pim.vcard.VCardParser_V21: boolean parseItem()>,<android.pim.vcard.VCardParser_V21: boolean parseItem()>,0,"{
+    mEncoding = sDefaultEncoding;
+    String line = getNonEmptyLine();
+    long start = System.currentTimeMillis();
+    String[] propertyNameAndValue = separateLineAndHandleGroup(line);
+    if (propertyNameAndValue == null) {
+        return true;
+    }
+    if (propertyNameAndValue.length != 2) {
+        throw new VCardException(""Invalid line \"""" + line + ""\"""");
+    }
+    String propertyName = propertyNameAndValue[0].toUpperCase();
+    String propertyValue = propertyNameAndValue[1];
+    mTimeParseLineAndHandleGroup += System.currentTimeMillis() - start;
+    if (propertyName.equals(""ADR"") || propertyName.equals(""ORG"") || propertyName.equals(""N"")) {
+        start = System.currentTimeMillis();
+        handleMultiplePropertyValue(propertyName, propertyValue);
+        mTimeParseAdrOrgN += System.currentTimeMillis() - start;
+        return false;
+    } else if (propertyName.equals(""AGENT"")) {
+        handleAgent(propertyValue);
+        return false;
+    } else if (isValidPropertyName(propertyName)) {
+        if (propertyName.equals(""BEGIN"")) {
+            if (propertyValue.equals(""VCARD"")) {
+                throw new VCardNestedException(""This vCard has nested vCard data in it."");
+            } else {
+                throw new VCardException(""Unknown BEGIN type: "" + propertyValue);
+            }
+        } else if (propertyName.equals(""VERSION"") && !propertyValue.equals(getVersion())) {
+            throw new VCardVersionException(""Incompatible version: "" + propertyValue + "" != "" + getVersion());
+        }
+        start = System.currentTimeMillis();
+        handlePropertyValue(propertyName, propertyValue);
+        mTimeParsePropertyValues += System.currentTimeMillis() - start;
+        return false;
+    }
+    throw new VCardException(""Unknown property name: \"""" + propertyName + ""\"""");
+}","{
+    mEncoding = sDefaultEncoding;
+    String line = getNonEmptyLine();
+    long start = System.currentTimeMillis();
+    String[] propertyNameAndValue = separateLineAndHandleGroup(line);
+    if (propertyNameAndValue == null) {
+        return true;
+    }
+    if (propertyNameAndValue.length != 2) {
+        throw new VCardInvalidLineException(""Invalid line \"""" + line + ""\"""");
+    }
+    String propertyName = propertyNameAndValue[0].toUpperCase();
+    String propertyValue = propertyNameAndValue[1];
+    mTimeParseLineAndHandleGroup += System.currentTimeMillis() - start;
+    if (propertyName.equals(""ADR"") || propertyName.equals(""ORG"") || propertyName.equals(""N"")) {
+        start = System.currentTimeMillis();
+        handleMultiplePropertyValue(propertyName, propertyValue);
+        mTimeParseAdrOrgN += System.currentTimeMillis() - start;
+        return false;
+    } else if (propertyName.equals(""AGENT"")) {
+        handleAgent(propertyValue);
+        return false;
+    } else if (isValidPropertyName(propertyName)) {
+        if (propertyName.equals(""BEGIN"")) {
+            if (propertyValue.equals(""VCARD"")) {
+                throw new VCardNestedException(""This vCard has nested vCard data in it."");
+            } else {
+                throw new VCardException(""Unknown BEGIN type: "" + propertyValue);
+            }
+        } else if (propertyName.equals(""VERSION"") && !propertyValue.equals(getVersion())) {
+            throw new VCardVersionException(""Incompatible version: "" + propertyValue + "" != "" + getVersion());
+        }
+        start = System.currentTimeMillis();
+        handlePropertyValue(propertyName, propertyValue);
+        mTimeParsePropertyValues += System.currentTimeMillis() - start;
+        return false;
+    }
+    throw new VCardException(""Unknown property name: \"""" + propertyName + ""\"""");
+}",1,"/**
+ * item = [groups "".""] name    [params] "":"" value CRLF
+ * / [groups "".""] ""ADR""   [params] "":"" addressparts CRLF
+ * / [groups "".""] ""ORG""   [params] "":"" orgparts CRLF
+ * / [groups "".""] ""N""     [params] "":"" nameparts CRLF
+ * / [groups "".""] ""AGENT"" [params] "":"" vcard CRLF
+ */
+","/**
+ * item = [groups "".""] name    [params] "":"" value CRLF
+ * / [groups "".""] ""ADR""   [params] "":"" addressparts CRLF
+ * / [groups "".""] ""ORG""   [params] "":"" orgparts CRLF
+ * / [groups "".""] ""N""     [params] "":"" nameparts CRLF
+ * / [groups "".""] ""AGENT"" [params] "":"" vcard CRLF
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"2,5",2,"The exception type thrown when `propertyNameAndValue.length != 2` has changed from `VCardException` in the early version to `VCardInvalidLineException` in the late version. This shows that there is an exception handling statement change and also a change in the dependent API since `VCardInvalidLineException` is now being used instead of `VCardException`. Hence, the code change type is 2,5.","Since the exception handling statement has been altered between the two versions, the late version of the API might throw a different type of exception (`VCardInvalidLineException`), which could potentially result in differing behavior when the method is called. So, the Compatibility Issue type is 2."
+57,"<android.accounts.AbstractAccountAuthenticator.Transport: void updateCredentials(IAccountAuthenticatorResponse,Account,String,Bundle)>",5,6,"<android.accounts.AbstractAccountAuthenticator.Transport: void updateCredentials(IAccountAuthenticatorResponse,Account,String,Bundle)>","<android.accounts.AbstractAccountAuthenticator.Transport: void updateCredentials(IAccountAuthenticatorResponse,Account,String,Bundle)>",0,"{
+    checkBinderPermission();
+    final Bundle result;
+    try {
+        result = AbstractAccountAuthenticator.this.updateCredentials(new AccountAuthenticatorResponse(response), account, authTokenType, loginOptions);
+    } catch (UnsupportedOperationException e) {
+        response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION, ""updateCredentials not supported"");
+        return;
+    }
+    if (result != null) {
+        response.onResult(result);
+    } else {
+        response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, ""no response from the authenticator"");
+    }
+}","{
+    checkBinderPermission();
+    try {
+        final Bundle result = AbstractAccountAuthenticator.this.updateCredentials(new AccountAuthenticatorResponse(response), account, authTokenType, loginOptions);
+        if (result != null) {
+            response.onResult(result);
+        }
+    } catch (NetworkErrorException e) {
+        response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+    } catch (UnsupportedOperationException e) {
+        response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION, ""updateCredentials not supported"");
+    }
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"1,2","1,2","The return statement 'response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, ""no response from the authenticator"");' in the Early Version is missing in the Late Version. Moreover, the exception handling has been changed, where NetworkErrorException has been introduced into Late_Version. Therefore, the code change types are both 1 and 2.","Both the removed return statement and the additional exception handling in the Late Version could lead to the method returning different values or throwing different exceptions, leading to potential Compatibility Issues of type 1 and 2."
+58,<android.inputmethodservice.KeyboardView: boolean onTouchEvent(MotionEvent)>,5,6,<android.inputmethodservice.KeyboardView: boolean onTouchEvent(MotionEvent)>,<android.inputmethodservice.KeyboardView: boolean onTouchEvent(MotionEvent)>,0,"{
+    // Convert multi-pointer up/down events to single up/down events to
+    // deal with the typical multi-pointer behavior of two-thumb typing
+    int pointerCount = me.getPointerCount();
+    boolean result = false;
+    if (pointerCount != mOldPointerCount) {
+        long now = me.getEventTime();
+        if (pointerCount == 1) {
+            // Send a down event for the latest pointer
+            MotionEvent down = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, me.getX(), me.getY(), me.getMetaState());
+            result = onModifiedTouchEvent(down);
+            down.recycle();
+            // If it's an up action, then deliver the up as well.
+            if (me.getAction() == MotionEvent.ACTION_UP) {
+                result = onModifiedTouchEvent(me);
+            }
+        } else {
+            // Send an up event for the last pointer
+            MotionEvent up = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, mOldPointerX, mOldPointerY, me.getMetaState());
+            result = onModifiedTouchEvent(up);
+            up.recycle();
+        }
+    } else {
+        if (pointerCount == 1) {
+            mOldPointerX = me.getX();
+            mOldPointerY = me.getY();
+            result = onModifiedTouchEvent(me);
+        } else {
+            // Don't do anything when 2 pointers are down and moving.
+            result = true;
+        }
+    }
+    mOldPointerCount = pointerCount;
+    return result;
+}","{
+    // Convert multi-pointer up/down events to single up/down events to
+    // deal with the typical multi-pointer behavior of two-thumb typing
+    final int pointerCount = me.getPointerCount();
+    final int action = me.getAction();
+    boolean result = false;
+    final long now = me.getEventTime();
+    if (pointerCount != mOldPointerCount) {
+        if (pointerCount == 1) {
+            // Send a down event for the latest pointer
+            MotionEvent down = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, me.getX(), me.getY(), me.getMetaState());
+            result = onModifiedTouchEvent(down, false);
+            down.recycle();
+            // If it's an up action, then deliver the up as well.
+            if (action == MotionEvent.ACTION_UP) {
+                result = onModifiedTouchEvent(me, true);
+            }
+        } else {
+            // Send an up event for the last pointer
+            MotionEvent up = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, mOldPointerX, mOldPointerY, me.getMetaState());
+            result = onModifiedTouchEvent(up, true);
+            up.recycle();
+        }
+    } else {
+        if (pointerCount == 1) {
+            result = onModifiedTouchEvent(me, false);
+            mOldPointerX = me.getX();
+            mOldPointerY = me.getY();
+        } else {
+            // Don't do anything when 2 pointers are down and moving.
+            result = true;
+        }
+    }
+    mOldPointerCount = pointerCount;
+    return result;
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,"1,4,5",1,"The parameters in the method call of onModifiedTouchEvent() have changed. In the late version, an additional boolean parameter has been added. This signifies a change in the dependent API and also changes the return statement and other statements, thus the code change types include 1,4,5.","As the method onModifiedTouchEvent() has added a new paramter, it might potentially change the behaviour of this method and thus might cause the onTouchEvent() to return a different result. Therefore, CI type is 1."
+59,"<android.accounts.AccountManager: void setPassword(Account,String)>",5,6,"<android.accounts.AccountManager: void setPassword(Account,String)>","<android.accounts.AccountManager: void setPassword(Account,String)>",0,"{
+    try {
+        mService.setPassword(account, password);
+    } catch (RemoteException e) {
+        // won't ever happen
+        throw new RuntimeException(e);
+    }
+}","{
+    if (account == null) {
+        Log.e(TAG, ""the account must not be null"");
+        return;
+    }
+    try {
+        mService.setPassword(account, password);
+    } catch (RemoteException e) {
+        // won't ever happen
+        throw new RuntimeException(e);
+    }
+}",1,,"/**
+ * Sets the password for the account. The password may be null. If the account does not exist
+ * then this call has no affect.
+ * <p>
+ * Requires that the caller has permission
+ * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and is running
+ * with the same UID as the Authenticator for the account.
+ * @param account the account whose password is to be set. Must not be null.
+ * @param password the password to set for the account. May be null.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"3,1",1,"A new ""if"" condition statement is added and an early return statement is introduced, so the code change type is 3,1.","The insertion of the early return statement can alter the behavior of the function, where the previous version of the API would have set the password even if the account was null, but after the change the function terminates without any operation. Thus, the CI type is 1."
+60,<android.service.wallpaper.WallpaperService.IWallpaperEngineWrapper: void executeMessage(Message)>,5,6,<android.service.wallpaper.WallpaperService.IWallpaperEngineWrapper: void executeMessage(Message)>,<android.service.wallpaper.WallpaperService.IWallpaperEngineWrapper: void executeMessage(Message)>,0,"{
+    switch(message.what) {
+        case DO_ATTACH:
+            {
+                try {
+                    mConnection.attachEngine(this);
+                } catch (RemoteException e) {
+                    Log.w(TAG, ""Wallpaper host disappeared"", e);
+                    return;
+                }
+                Engine engine = onCreateEngine();
+                mEngine = engine;
+                engine.attach(this);
+                return;
+            }
+        case DO_DETACH:
+            {
+                mEngine.detach();
+                return;
+            }
+        case DO_SET_DESIRED_SIZE:
+            {
+                mEngine.doDesiredSizeChanged(message.arg1, message.arg2);
+                return;
+            }
+        case MSG_UPDATE_SURFACE:
+            mEngine.updateSurface(true, false);
+            break;
+        case MSG_VISIBILITY_CHANGED:
+            if (DEBUG)
+                Log.v(TAG, ""Visibility change in "" + mEngine + "": "" + message.arg1);
+            mEngine.doVisibilityChanged(message.arg1 != 0);
+            break;
+        case MSG_WALLPAPER_OFFSETS:
+            {
+                mEngine.doOffsetsChanged();
+            }
+            break;
+        case MSG_WINDOW_RESIZED:
+            {
+                final boolean reportDraw = message.arg1 != 0;
+                mEngine.updateSurface(true, false);
+                if (reportDraw) {
+                    try {
+                        mEngine.mSession.finishDrawing(mEngine.mWindow);
+                    } catch (RemoteException e) {
+                    }
+                }
+            }
+            break;
+        case MSG_TOUCH_EVENT:
+            {
+                MotionEvent ev = (MotionEvent) message.obj;
+                synchronized (mEngine.mLock) {
+                    if (mEngine.mPendingMove == ev) {
+                        mEngine.mPendingMove = null;
+                    }
+                }
+                mEngine.onTouchEvent(ev);
+                ev.recycle();
+            }
+            break;
+        default:
+            Log.w(TAG, ""Unknown message type "" + message.what);
+    }
+}","{
+    switch(message.what) {
+        case DO_ATTACH:
+            {
+                try {
+                    mConnection.attachEngine(this);
+                } catch (RemoteException e) {
+                    Log.w(TAG, ""Wallpaper host disappeared"", e);
+                    return;
+                }
+                Engine engine = onCreateEngine();
+                mEngine = engine;
+                engine.attach(this);
+                return;
+            }
+        case DO_DETACH:
+            {
+                mEngine.detach();
+                return;
+            }
+        case DO_SET_DESIRED_SIZE:
+            {
+                mEngine.doDesiredSizeChanged(message.arg1, message.arg2);
+                return;
+            }
+        case MSG_UPDATE_SURFACE:
+            mEngine.updateSurface(true, false);
+            break;
+        case MSG_VISIBILITY_CHANGED:
+            if (DEBUG)
+                Log.v(TAG, ""Visibility change in "" + mEngine + "": "" + message.arg1);
+            mEngine.doVisibilityChanged(message.arg1 != 0);
+            break;
+        case MSG_WALLPAPER_OFFSETS:
+            {
+                mEngine.doOffsetsChanged();
+            }
+            break;
+        case MSG_WALLPAPER_COMMAND:
+            {
+                WallpaperCommand cmd = (WallpaperCommand) message.obj;
+                mEngine.doCommand(cmd);
+            }
+            break;
+        case MSG_WINDOW_RESIZED:
+            {
+                final boolean reportDraw = message.arg1 != 0;
+                mEngine.updateSurface(true, false);
+                if (reportDraw) {
+                    try {
+                        mEngine.mSession.finishDrawing(mEngine.mWindow);
+                    } catch (RemoteException e) {
+                    }
+                }
+            }
+            break;
+        case MSG_TOUCH_EVENT:
+            {
+                MotionEvent ev = (MotionEvent) message.obj;
+                synchronized (mEngine.mLock) {
+                    if (mEngine.mPendingMove == ev) {
+                        mEngine.mPendingMove = null;
+                    }
+                }
+                if (DEBUG)
+                    Log.v(TAG, ""Delivering touch event: "" + ev);
+                mEngine.onTouchEvent(ev);
+                ev.recycle();
+            }
+            break;
+        default:
+            Log.w(TAG, ""Unknown message type "" + message.what);
+    }
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"3,4",0,"The statement under the 'switch' case 'MSG_WALLPAPER_COMMAND' and 'MSG_TOUCH_EVENT' has been added, and part of the condition inside 'switch' has changed, hence the type is 3 and 4.","Although the handling of some messages has changes but still, this doesn't lead to potential different return values or exceptions. Therefore, no compatibility issue exists. The CI type is 0."
+61,<android.pim.vcard.VCardParser_V21: String[] separateLineAndHandleGroup(String)>,5,6,<android.pim.vcard.VCardParser_V21: String[] separateLineAndHandleGroup(String)>,<android.pim.vcard.VCardParser_V21: String[] separateLineAndHandleGroup(String)>,0,"{
+    int length = line.length();
+    int state = STATE_GROUP_OR_PROPNAME;
+    int nameIndex = 0;
+    String[] propertyNameAndValue = new String[2];
+    for (int i = 0; i < length; i++) {
+        char ch = line.charAt(i);
+        switch(state) {
+            case STATE_GROUP_OR_PROPNAME:
+                if (ch == ':') {
+                    String propertyName = line.substring(nameIndex, i);
+                    if (propertyName.equalsIgnoreCase(""END"")) {
+                        mPreviousLine = line;
+                        return null;
+                    }
+                    if (mBuilder != null) {
+                        mBuilder.propertyName(propertyName);
+                    }
+                    propertyNameAndValue[0] = propertyName;
+                    if (i < length - 1) {
+                        propertyNameAndValue[1] = line.substring(i + 1);
+                    } else {
+                        propertyNameAndValue[1] = """";
+                    }
+                    return propertyNameAndValue;
+                } else if (ch == '.') {
+                    String groupName = line.substring(nameIndex, i);
+                    if (mBuilder != null) {
+                        mBuilder.propertyGroup(groupName);
+                    }
+                    nameIndex = i + 1;
+                } else if (ch == ';') {
+                    String propertyName = line.substring(nameIndex, i);
+                    if (propertyName.equalsIgnoreCase(""END"")) {
+                        mPreviousLine = line;
+                        return null;
+                    }
+                    if (mBuilder != null) {
+                        mBuilder.propertyName(propertyName);
+                    }
+                    propertyNameAndValue[0] = propertyName;
+                    nameIndex = i + 1;
+                    state = STATE_PARAMS;
+                }
+                break;
+            case STATE_PARAMS:
+                if (ch == '""') {
+                    state = STATE_PARAMS_IN_DQUOTE;
+                } else if (ch == ';') {
+                    handleParams(line.substring(nameIndex, i));
+                    nameIndex = i + 1;
+                } else if (ch == ':') {
+                    handleParams(line.substring(nameIndex, i));
+                    if (i < length - 1) {
+                        propertyNameAndValue[1] = line.substring(i + 1);
+                    } else {
+                        propertyNameAndValue[1] = """";
+                    }
+                    return propertyNameAndValue;
+                }
+                break;
+            case STATE_PARAMS_IN_DQUOTE:
+                if (ch == '""') {
+                    state = STATE_PARAMS;
+                }
+                break;
+        }
+    }
+    throw new VCardException(""Invalid line: \"""" + line + ""\"""");
+}","{
+    int length = line.length();
+    int state = STATE_GROUP_OR_PROPNAME;
+    int nameIndex = 0;
+    String[] propertyNameAndValue = new String[2];
+    if (length > 0 && line.charAt(0) == '#') {
+        throw new VCardInvalidCommentLineException();
+    }
+    for (int i = 0; i < length; i++) {
+        char ch = line.charAt(i);
+        switch(state) {
+            case STATE_GROUP_OR_PROPNAME:
+                if (ch == ':') {
+                    String propertyName = line.substring(nameIndex, i);
+                    if (propertyName.equalsIgnoreCase(""END"")) {
+                        mPreviousLine = line;
+                        return null;
+                    }
+                    if (mBuilder != null) {
+                        mBuilder.propertyName(propertyName);
+                    }
+                    propertyNameAndValue[0] = propertyName;
+                    if (i < length - 1) {
+                        propertyNameAndValue[1] = line.substring(i + 1);
+                    } else {
+                        propertyNameAndValue[1] = """";
+                    }
+                    return propertyNameAndValue;
+                } else if (ch == '.') {
+                    String groupName = line.substring(nameIndex, i);
+                    if (mBuilder != null) {
+                        mBuilder.propertyGroup(groupName);
+                    }
+                    nameIndex = i + 1;
+                } else if (ch == ';') {
+                    String propertyName = line.substring(nameIndex, i);
+                    if (propertyName.equalsIgnoreCase(""END"")) {
+                        mPreviousLine = line;
+                        return null;
+                    }
+                    if (mBuilder != null) {
+                        mBuilder.propertyName(propertyName);
+                    }
+                    propertyNameAndValue[0] = propertyName;
+                    nameIndex = i + 1;
+                    state = STATE_PARAMS;
+                }
+                break;
+            case STATE_PARAMS:
+                if (ch == '""') {
+                    state = STATE_PARAMS_IN_DQUOTE;
+                } else if (ch == ';') {
+                    handleParams(line.substring(nameIndex, i));
+                    nameIndex = i + 1;
+                } else if (ch == ':') {
+                    handleParams(line.substring(nameIndex, i));
+                    if (i < length - 1) {
+                        propertyNameAndValue[1] = line.substring(i + 1);
+                    } else {
+                        propertyNameAndValue[1] = """";
+                    }
+                    return propertyNameAndValue;
+                }
+                break;
+            case STATE_PARAMS_IN_DQUOTE:
+                if (ch == '""') {
+                    state = STATE_PARAMS;
+                }
+                break;
+        }
+    }
+    throw new VCardInvalidLineException(""Invalid line: \"""" + line + ""\"""");
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"2,3,4",2,"A new control statement block ""if (length > 0 && line.charAt(0) == '#')"" has been added and a new exception ""throw new VCardInvalidCommentLineException();"" is thrown in the new block in the late version. Besides, the exception thrown at the end of the implementation has been changed from ""VCardException"" to ""VCardInvalidLineException"". So, the code change type is 2, 3, and 4.","The newly added block introduces a new exception type ""VCardInvalidCommentLineException()"" and the end exception type has been changed. It is possible that both types of exceptions are thrown differently between the versions. Thus, the CI type is 2."
+62,"<android.content.res.AssetManager: XmlBlock openXmlBlockAsset(int,String)>",5,6,"<android.content.res.AssetManager: XmlBlock openXmlBlockAsset(int,String)>","<android.content.res.AssetManager: XmlBlock openXmlBlockAsset(int,String)>",0,"{
+    synchronized (mSync) {
+        if (!mOpen) {
+            throw new RuntimeException(""Assetmanager has been closed"");
+        }
+        int xmlBlock = openXmlAssetNative(cookie, fileName);
+        if (xmlBlock != 0) {
+            mNumRefs++;
+            return new XmlBlock(this, xmlBlock);
+        }
+    }
+    throw new FileNotFoundException(""Asset XML file: "" + fileName);
+}","{
+    synchronized (this) {
+        if (!mOpen) {
+            throw new RuntimeException(""Assetmanager has been closed"");
+        }
+        int xmlBlock = openXmlAssetNative(cookie, fileName);
+        if (xmlBlock != 0) {
+            mNumRefs++;
+            return new XmlBlock(this, xmlBlock);
+        }
+    }
+    throw new FileNotFoundException(""Asset XML file: "" + fileName);
+}",1,"/*package*/
+","/*package*/
+",-1,,,-1,-1,-1,-1,-1,-1,4,0,"In the synchronized statement, the lock object has been changed from mSync to this, so the code change type is 4.","The change from mSync to 'this' as the lock object doesn't affect the behavior of the API, the return value and the exceptions thrown are still the same. Thus, no Compatibility Issue exists."
+63,"<android.accounts.AbstractAccountAuthenticator.Transport: void editProperties(IAccountAuthenticatorResponse,String)>",5,6,"<android.accounts.AbstractAccountAuthenticator.Transport: void editProperties(IAccountAuthenticatorResponse,String)>","<android.accounts.AbstractAccountAuthenticator.Transport: void editProperties(IAccountAuthenticatorResponse,String)>",0,"{
+    checkBinderPermission();
+    final Bundle result;
+    try {
+        result = AbstractAccountAuthenticator.this.editProperties(new AccountAuthenticatorResponse(response), accountType);
+    } catch (UnsupportedOperationException e) {
+        response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION, ""editProperties not supported"");
+        return;
+    }
+    if (result != null) {
+        response.onResult(result);
+    } else {
+        response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, ""no response from the authenticator"");
+    }
+}","{
+    checkBinderPermission();
+    try {
+        final Bundle result = AbstractAccountAuthenticator.this.editProperties(new AccountAuthenticatorResponse(response), accountType);
+        if (result != null) {
+            response.onResult(result);
+        }
+    } catch (UnsupportedOperationException e) {
+        response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION, ""editProperties not supported"");
+    }
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"3,4",1,"The control dependency is changed where the 'if' block (result != null) is now within the 'try-catch' statement. Also the error-respones statement 'response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, ""no response from the authenticator"")' has been deleted. So the code change type is 3,4. ","The deletion of the error-response can lead to the situation that the late version API may not throw exception when result is null, while the early version does. Therefore, the return behavior of the API has changed, thus CI type is 1."
+64,<android.pim.vcard.VCardParser_V21: boolean isValidPropertyName(String)>,5,6,<android.pim.vcard.VCardParser_V21: boolean isValidPropertyName(String)>,<android.pim.vcard.VCardParser_V21: boolean isValidPropertyName(String)>,0,"{
+    if (!(sAvailablePropertyNameV21.contains(propertyName.toUpperCase()) || propertyName.startsWith(""X-"")) && !mWarningValueMap.contains(propertyName)) {
+        mWarningValueMap.add(propertyName);
+        Log.w(LOG_TAG, ""Property name unsupported by vCard 2.1: "" + propertyName);
+    }
+    return true;
+}","{
+    if (!(sAvailablePropertyNameSetV21.contains(propertyName.toUpperCase()) || propertyName.startsWith(""X-"")) && !mWarningValueMap.contains(propertyName)) {
+        mWarningValueMap.add(propertyName);
+        Log.w(LOG_TAG, ""Property name unsupported by vCard 2.1: "" + propertyName);
+    }
+    return true;
+}",1,"/**
+ * @return true when the propertyName is a valid property name.
+ */
+","/**
+ * @return true when the propertyName is a valid property name.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,5,0,"The method 'contains' was invoked from a different object (from sAvailablePropertyNameV21 to sAvailablePropertyNameSetV21) which implies a change in the dependent API, hence the code change type is 5.","Despite the code change, the return value of this API and its exception handling situation have not been altered or induced by the change. Therefore, no compatibility issue exists here."
+65,<android.webkit.WebView.PrivateHandler: void handleMessage(Message)>,5,6,<android.webkit.WebView.PrivateHandler: void handleMessage(Message)>,<android.webkit.WebView.PrivateHandler: void handleMessage(Message)>,0,"{
+    if (DebugFlags.WEB_VIEW) {
+        Log.v(LOGTAG, msg.what < REMEMBER_PASSWORD || msg.what > INVAL_RECT_MSG_ID ? Integer.toString(msg.what) : HandlerDebugString[msg.what - REMEMBER_PASSWORD]);
+    }
+    if (mWebViewCore == null) {
+        // after WebView's destroy() is called, skip handling messages.
+        return;
+    }
+    switch(msg.what) {
+        case REMEMBER_PASSWORD:
+            {
+                mDatabase.setUsernamePassword(msg.getData().getString(""host""), msg.getData().getString(""username""), msg.getData().getString(""password""));
+                ((Message) msg.obj).sendToTarget();
+                break;
+            }
+        case NEVER_REMEMBER_PASSWORD:
+            {
+                mDatabase.setUsernamePassword(msg.getData().getString(""host""), null, null);
+                ((Message) msg.obj).sendToTarget();
+                break;
+            }
+        case SWITCH_TO_SHORTPRESS:
+            {
+                // it won't block panning the page.
+                if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
+                    mPreventDrag = PREVENT_DRAG_NO;
+                }
+                if (mTouchMode == TOUCH_INIT_MODE) {
+                    mTouchMode = TOUCH_SHORTPRESS_START_MODE;
+                    updateSelection();
+                } else if (mTouchMode == TOUCH_DOUBLE_TAP_MODE) {
+                    mTouchMode = TOUCH_DONE_MODE;
+                }
+                break;
+            }
+        case SWITCH_TO_LONGPRESS:
+            {
+                if (mPreventDrag == PREVENT_DRAG_NO) {
+                    mTouchMode = TOUCH_DONE_MODE;
+                    performLongClick();
+                    rebuildWebTextView();
+                }
+                break;
+            }
+        case RELEASE_SINGLE_TAP:
+            {
+                if (mPreventDrag == PREVENT_DRAG_NO) {
+                    mTouchMode = TOUCH_DONE_MODE;
+                    doShortPress();
+                }
+                break;
+            }
+        case SCROLL_BY_MSG_ID:
+            setContentScrollBy(msg.arg1, msg.arg2, (Boolean) msg.obj);
+            break;
+        case SYNC_SCROLL_TO_MSG_ID:
+            if (mUserScroll) {
+                // if user has scrolled explicitly, don't sync the
+                // scroll position any more
+                mUserScroll = false;
+                break;
+            }
+        // fall through
+        case SCROLL_TO_MSG_ID:
+            if (setContentScrollTo(msg.arg1, msg.arg2)) {
+                // if we can't scroll to the exact position due to pin,
+                // send a message to WebCore to re-scroll when we get a
+                // new picture
+                mUserScroll = false;
+                mWebViewCore.sendMessage(EventHub.SYNC_SCROLL, msg.arg1, msg.arg2);
+            }
+            break;
+        case SPAWN_SCROLL_TO_MSG_ID:
+            spawnContentScrollTo(msg.arg1, msg.arg2);
+            break;
+        case NEW_PICTURE_MSG_ID:
+            {
+                WebSettings settings = mWebViewCore.getSettings();
+                // called for new content
+                final int viewWidth = getViewWidth();
+                final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
+                final Point viewSize = draw.mViewPoint;
+                boolean useWideViewport = settings.getUseWideViewPort();
+                WebViewCore.RestoreState restoreState = draw.mRestoreState;
+                if (restoreState != null) {
+                    mInZoomOverview = false;
+                    mLastScale = restoreState.mTextWrapScale;
+                    if (restoreState.mMinScale == 0) {
+                        if (restoreState.mMobileSite) {
+                            if (draw.mMinPrefWidth > Math.max(0, draw.mViewPoint.x)) {
+                                mMinZoomScale = (float) viewWidth / draw.mMinPrefWidth;
+                                mMinZoomScaleFixed = false;
+                            } else {
+                                mMinZoomScale = restoreState.mDefaultScale;
+                                mMinZoomScaleFixed = true;
+                            }
+                        } else {
+                            mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+                            mMinZoomScaleFixed = false;
+                        }
+                    } else {
+                        mMinZoomScale = restoreState.mMinScale;
+                        mMinZoomScaleFixed = true;
+                    }
+                    if (restoreState.mMaxScale == 0) {
+                        mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
+                    } else {
+                        mMaxZoomScale = restoreState.mMaxScale;
+                    }
+                    setNewZoomScale(mLastScale, false);
+                    setContentScrollTo(restoreState.mScrollX, restoreState.mScrollY);
+                    if (useWideViewport && settings.getLoadWithOverviewMode()) {
+                        if (restoreState.mViewScale == 0 || (restoreState.mMobileSite && mMinZoomScale < restoreState.mDefaultScale)) {
+                            mInZoomOverview = true;
+                        }
+                    }
+                    // As we are on a new page, remove the WebTextView. This
+                    // is necessary for page loads driven by webkit, and in
+                    // particular when the user was on a password field, so
+                    // the WebTextView was visible.
+                    clearTextEntry();
+                }
+                // We update the layout (i.e. request a layout from the
+                // view system) if the last view size that we sent to
+                // WebCore matches the view size of the picture we just
+                // received in the fixed dimension.
+                final boolean updateLayout = viewSize.x == mLastWidthSent && viewSize.y == mLastHeightSent;
+                recordNewContentSize(draw.mWidthHeight.x, draw.mWidthHeight.y + (mFindIsUp ? mFindHeight : 0), updateLayout);
+                if (DebugFlags.WEB_VIEW) {
+                    Rect b = draw.mInvalRegion.getBounds();
+                    Log.v(LOGTAG, ""NEW_PICTURE_MSG_ID {"" + b.left + "","" + b.top + "","" + b.right + "","" + b.bottom + ""}"");
+                }
+                invalidateContentRect(draw.mInvalRegion.getBounds());
+                if (mPictureListener != null) {
+                    mPictureListener.onNewPicture(WebView.this, capturePicture());
+                }
+                if (useWideViewport) {
+                    mZoomOverviewWidth = Math.max(draw.mMinPrefWidth, draw.mViewPoint.x);
+                }
+                if (!mMinZoomScaleFixed) {
+                    mMinZoomScale = (float) viewWidth / mZoomOverviewWidth;
+                }
+                if (!mDrawHistory && mInZoomOverview) {
+                    // the rounding error case.
+                    if (Math.abs((viewWidth * mInvActualScale) - mZoomOverviewWidth) > 1) {
+                        setNewZoomScale((float) viewWidth / mZoomOverviewWidth, false);
+                    }
+                }
+                break;
+            }
+        case WEBCORE_INITIALIZED_MSG_ID:
+            // nativeCreate sets mNativeClass to a non-zero value
+            nativeCreate(msg.arg1);
+            break;
+        case UPDATE_TEXTFIELD_TEXT_MSG_ID:
+            // and representing the same node as the pointer.
+            if (inEditingMode() && mWebTextView.isSameTextField(msg.arg1)) {
+                if (msg.getData().getBoolean(""password"")) {
+                    Spannable text = (Spannable) mWebTextView.getText();
+                    int start = Selection.getSelectionStart(text);
+                    int end = Selection.getSelectionEnd(text);
+                    mWebTextView.setInPassword(true);
+                    // Restore the selection, which may have been
+                    // ruined by setInPassword.
+                    Spannable pword = (Spannable) mWebTextView.getText();
+                    Selection.setSelection(pword, start, end);
+                // If the text entry has created more events, ignore
+                // this one.
+                } else if (msg.arg2 == mTextGeneration) {
+                    mWebTextView.setTextAndKeepSelection((String) msg.obj);
+                }
+            }
+            break;
+        case UPDATE_TEXT_SELECTION_MSG_ID:
+            if (inEditingMode() && mWebTextView.isSameTextField(msg.arg1) && msg.arg2 == mTextGeneration) {
+                WebViewCore.TextSelectionData tData = (WebViewCore.TextSelectionData) msg.obj;
+                mWebTextView.setSelectionFromWebKit(tData.mStart, tData.mEnd);
+            }
+            break;
+        case MOVE_OUT_OF_PLUGIN:
+            if (nativePluginEatsNavKey()) {
+                navHandledKey(msg.arg1, 1, false, 0, true);
+            }
+            break;
+        case UPDATE_TEXT_ENTRY_MSG_ID:
+            // sure the text edit box is still on the  screen.
+            if (inEditingMode() && nativeCursorIsTextInput()) {
+                mWebTextView.bringIntoView();
+                rebuildWebTextView();
+            }
+            break;
+        case CLEAR_TEXT_ENTRY:
+            clearTextEntry();
+            break;
+        case INVAL_RECT_MSG_ID:
+            {
+                Rect r = (Rect) msg.obj;
+                if (r == null) {
+                    invalidate();
+                } else {
+                    // we need to scale r from content into view coords,
+                    // which viewInvalidate() does for us
+                    viewInvalidate(r.left, r.top, r.right, r.bottom);
+                }
+                break;
+            }
+        case REQUEST_FORM_DATA:
+            AutoCompleteAdapter adapter = (AutoCompleteAdapter) msg.obj;
+            if (mWebTextView.isSameTextField(msg.arg1)) {
+                mWebTextView.setAdapterCustom(adapter);
+            }
+            break;
+        case UPDATE_CLIPBOARD:
+            String str = (String) msg.obj;
+            if (DebugFlags.WEB_VIEW) {
+                Log.v(LOGTAG, ""UPDATE_CLIPBOARD "" + str);
+            }
+            try {
+                IClipboard clip = IClipboard.Stub.asInterface(ServiceManager.getService(""clipboard""));
+                clip.setClipboardText(str);
+            } catch (android.os.RemoteException e) {
+                Log.e(LOGTAG, ""Clipboard failed"", e);
+            }
+            break;
+        case RESUME_WEBCORE_UPDATE:
+            WebViewCore.resumeUpdate(mWebViewCore);
+            break;
+        case LONG_PRESS_CENTER:
+            // as this is shared by keydown and trackballdown, reset all
+            // the states
+            mGotCenterDown = false;
+            mTrackballDown = false;
+            // do nothing.
+            if (getParent() != null) {
+                performLongClick();
+            }
+            break;
+        case WEBCORE_NEED_TOUCH_EVENTS:
+            mForwardTouchEvents = (msg.arg1 != 0);
+            break;
+        case PREVENT_TOUCH_ID:
+            if (msg.arg1 == MotionEvent.ACTION_DOWN) {
+                // to time out
+                if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
+                    mPreventDrag = msg.arg2 == 1 ? PREVENT_DRAG_YES : PREVENT_DRAG_NO;
+                    if (mPreventDrag == PREVENT_DRAG_YES) {
+                        mTouchMode = TOUCH_DONE_MODE;
+                    }
+                }
+            }
+            break;
+        case REQUEST_KEYBOARD:
+            if (msg.arg1 == 0) {
+                hideSoftKeyboard();
+            } else {
+                displaySoftKeyboard(false);
+            }
+            break;
+        default:
+            super.handleMessage(msg);
+            break;
+    }
+}","{
+    if (DebugFlags.WEB_VIEW) {
+        Log.v(LOGTAG, msg.what < REMEMBER_PASSWORD || msg.what > INVAL_RECT_MSG_ID ? Integer.toString(msg.what) : HandlerDebugString[msg.what - REMEMBER_PASSWORD]);
+    }
+    if (mWebViewCore == null) {
+        // after WebView's destroy() is called, skip handling messages.
+        return;
+    }
+    switch(msg.what) {
+        case REMEMBER_PASSWORD:
+            {
+                mDatabase.setUsernamePassword(msg.getData().getString(""host""), msg.getData().getString(""username""), msg.getData().getString(""password""));
+                ((Message) msg.obj).sendToTarget();
+                break;
+            }
+        case NEVER_REMEMBER_PASSWORD:
+            {
+                mDatabase.setUsernamePassword(msg.getData().getString(""host""), null, null);
+                ((Message) msg.obj).sendToTarget();
+                break;
+            }
+        case SWITCH_TO_SHORTPRESS:
+            {
+                // it won't block panning the page.
+                if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
+                    mPreventDrag = PREVENT_DRAG_NO;
+                }
+                if (mTouchMode == TOUCH_INIT_MODE) {
+                    mTouchMode = TOUCH_SHORTPRESS_START_MODE;
+                    updateSelection();
+                } else if (mTouchMode == TOUCH_DOUBLE_TAP_MODE) {
+                    mTouchMode = TOUCH_DONE_MODE;
+                }
+                break;
+            }
+        case SWITCH_TO_LONGPRESS:
+            {
+                if (mPreventDrag == PREVENT_DRAG_NO) {
+                    mTouchMode = TOUCH_DONE_MODE;
+                    performLongClick();
+                    rebuildWebTextView();
+                }
+                break;
+            }
+        case RELEASE_SINGLE_TAP:
+            {
+                if (mPreventDrag == PREVENT_DRAG_NO) {
+                    mTouchMode = TOUCH_DONE_MODE;
+                    doShortPress();
+                }
+                break;
+            }
+        case SCROLL_BY_MSG_ID:
+            setContentScrollBy(msg.arg1, msg.arg2, (Boolean) msg.obj);
+            break;
+        case SYNC_SCROLL_TO_MSG_ID:
+            if (mUserScroll) {
+                // if user has scrolled explicitly, don't sync the
+                // scroll position any more
+                mUserScroll = false;
+                break;
+            }
+        // fall through
+        case SCROLL_TO_MSG_ID:
+            if (setContentScrollTo(msg.arg1, msg.arg2)) {
+                // if we can't scroll to the exact position due to pin,
+                // send a message to WebCore to re-scroll when we get a
+                // new picture
+                mUserScroll = false;
+                mWebViewCore.sendMessage(EventHub.SYNC_SCROLL, msg.arg1, msg.arg2);
+            }
+            break;
+        case SPAWN_SCROLL_TO_MSG_ID:
+            spawnContentScrollTo(msg.arg1, msg.arg2);
+            break;
+        case NEW_PICTURE_MSG_ID:
+            {
+                WebSettings settings = mWebViewCore.getSettings();
+                // called for new content
+                final int viewWidth = getViewWidth();
+                final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
+                final Point viewSize = draw.mViewPoint;
+                boolean useWideViewport = settings.getUseWideViewPort();
+                WebViewCore.RestoreState restoreState = draw.mRestoreState;
+                if (restoreState != null) {
+                    mInZoomOverview = false;
+                    mLastScale = mInitialScaleInPercent > 0 ? mInitialScaleInPercent / 100.0f : restoreState.mTextWrapScale;
+                    if (restoreState.mMinScale == 0) {
+                        if (restoreState.mMobileSite) {
+                            if (draw.mMinPrefWidth > Math.max(0, draw.mViewPoint.x)) {
+                                mMinZoomScale = (float) viewWidth / draw.mMinPrefWidth;
+                                mMinZoomScaleFixed = false;
+                            } else {
+                                mMinZoomScale = restoreState.mDefaultScale;
+                                mMinZoomScaleFixed = true;
+                            }
+                        } else {
+                            mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+                            mMinZoomScaleFixed = false;
+                        }
+                    } else {
+                        mMinZoomScale = restoreState.mMinScale;
+                        mMinZoomScaleFixed = true;
+                    }
+                    if (restoreState.mMaxScale == 0) {
+                        mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
+                    } else {
+                        mMaxZoomScale = restoreState.mMaxScale;
+                    }
+                    setNewZoomScale(mLastScale, false);
+                    setContentScrollTo(restoreState.mScrollX, restoreState.mScrollY);
+                    if (useWideViewport && settings.getLoadWithOverviewMode()) {
+                        if (restoreState.mViewScale == 0 || (restoreState.mMobileSite && mMinZoomScale < restoreState.mDefaultScale)) {
+                            mInZoomOverview = true;
+                        }
+                    }
+                    // As we are on a new page, remove the WebTextView. This
+                    // is necessary for page loads driven by webkit, and in
+                    // particular when the user was on a password field, so
+                    // the WebTextView was visible.
+                    clearTextEntry();
+                }
+                // We update the layout (i.e. request a layout from the
+                // view system) if the last view size that we sent to
+                // WebCore matches the view size of the picture we just
+                // received in the fixed dimension.
+                final boolean updateLayout = viewSize.x == mLastWidthSent && viewSize.y == mLastHeightSent;
+                recordNewContentSize(draw.mWidthHeight.x, draw.mWidthHeight.y + (mFindIsUp ? mFindHeight : 0), updateLayout);
+                if (DebugFlags.WEB_VIEW) {
+                    Rect b = draw.mInvalRegion.getBounds();
+                    Log.v(LOGTAG, ""NEW_PICTURE_MSG_ID {"" + b.left + "","" + b.top + "","" + b.right + "","" + b.bottom + ""}"");
+                }
+                invalidateContentRect(draw.mInvalRegion.getBounds());
+                if (mPictureListener != null) {
+                    mPictureListener.onNewPicture(WebView.this, capturePicture());
+                }
+                if (useWideViewport) {
+                    mZoomOverviewWidth = Math.max(draw.mMinPrefWidth, draw.mViewPoint.x);
+                }
+                if (!mMinZoomScaleFixed) {
+                    mMinZoomScale = (float) viewWidth / mZoomOverviewWidth;
+                }
+                if (!mDrawHistory && mInZoomOverview) {
+                    // the rounding error case.
+                    if (Math.abs((viewWidth * mInvActualScale) - mZoomOverviewWidth) > 1) {
+                        setNewZoomScale((float) viewWidth / mZoomOverviewWidth, false);
+                    }
+                }
+                break;
+            }
+        case WEBCORE_INITIALIZED_MSG_ID:
+            // nativeCreate sets mNativeClass to a non-zero value
+            nativeCreate(msg.arg1);
+            break;
+        case UPDATE_TEXTFIELD_TEXT_MSG_ID:
+            // and representing the same node as the pointer.
+            if (inEditingMode() && mWebTextView.isSameTextField(msg.arg1)) {
+                if (msg.getData().getBoolean(""password"")) {
+                    Spannable text = (Spannable) mWebTextView.getText();
+                    int start = Selection.getSelectionStart(text);
+                    int end = Selection.getSelectionEnd(text);
+                    mWebTextView.setInPassword(true);
+                    // Restore the selection, which may have been
+                    // ruined by setInPassword.
+                    Spannable pword = (Spannable) mWebTextView.getText();
+                    Selection.setSelection(pword, start, end);
+                // If the text entry has created more events, ignore
+                // this one.
+                } else if (msg.arg2 == mTextGeneration) {
+                    mWebTextView.setTextAndKeepSelection((String) msg.obj);
+                }
+            }
+            break;
+        case UPDATE_TEXT_SELECTION_MSG_ID:
+            if (inEditingMode() && mWebTextView.isSameTextField(msg.arg1) && msg.arg2 == mTextGeneration) {
+                WebViewCore.TextSelectionData tData = (WebViewCore.TextSelectionData) msg.obj;
+                mWebTextView.setSelectionFromWebKit(tData.mStart, tData.mEnd);
+            }
+            break;
+        case MOVE_OUT_OF_PLUGIN:
+            if (nativePluginEatsNavKey()) {
+                navHandledKey(msg.arg1, 1, false, 0, true);
+            }
+            break;
+        case UPDATE_TEXT_ENTRY_MSG_ID:
+            // sure the text edit box is still on the  screen.
+            if (inEditingMode() && nativeCursorIsTextInput()) {
+                mWebTextView.bringIntoView();
+                rebuildWebTextView();
+            }
+            break;
+        case CLEAR_TEXT_ENTRY:
+            clearTextEntry();
+            break;
+        case INVAL_RECT_MSG_ID:
+            {
+                Rect r = (Rect) msg.obj;
+                if (r == null) {
+                    invalidate();
+                } else {
+                    // we need to scale r from content into view coords,
+                    // which viewInvalidate() does for us
+                    viewInvalidate(r.left, r.top, r.right, r.bottom);
+                }
+                break;
+            }
+        case REQUEST_FORM_DATA:
+            AutoCompleteAdapter adapter = (AutoCompleteAdapter) msg.obj;
+            if (mWebTextView.isSameTextField(msg.arg1)) {
+                mWebTextView.setAdapterCustom(adapter);
+            }
+            break;
+        case UPDATE_CLIPBOARD:
+            String str = (String) msg.obj;
+            if (DebugFlags.WEB_VIEW) {
+                Log.v(LOGTAG, ""UPDATE_CLIPBOARD "" + str);
+            }
+            try {
+                IClipboard clip = IClipboard.Stub.asInterface(ServiceManager.getService(""clipboard""));
+                clip.setClipboardText(str);
+            } catch (android.os.RemoteException e) {
+                Log.e(LOGTAG, ""Clipboard failed"", e);
+            }
+            break;
+        case RESUME_WEBCORE_UPDATE:
+            WebViewCore.resumeUpdate(mWebViewCore);
+            break;
+        case LONG_PRESS_CENTER:
+            // as this is shared by keydown and trackballdown, reset all
+            // the states
+            mGotCenterDown = false;
+            mTrackballDown = false;
+            // do nothing.
+            if (getParent() != null) {
+                performLongClick();
+            }
+            break;
+        case WEBCORE_NEED_TOUCH_EVENTS:
+            mForwardTouchEvents = (msg.arg1 != 0);
+            break;
+        case PREVENT_TOUCH_ID:
+            if (msg.arg1 == MotionEvent.ACTION_DOWN) {
+                // to time out
+                if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
+                    mPreventDrag = msg.arg2 == 1 ? PREVENT_DRAG_YES : PREVENT_DRAG_NO;
+                    if (mPreventDrag == PREVENT_DRAG_YES) {
+                        mTouchMode = TOUCH_DONE_MODE;
+                    }
+                }
+            }
+            break;
+        case REQUEST_KEYBOARD:
+            if (msg.arg1 == 0) {
+                hideSoftKeyboard();
+            } else {
+                displaySoftKeyboard(false);
+            }
+            break;
+        default:
+            super.handleMessage(msg);
+            break;
+    }
+}",1,,,-1,[@Override],[@Override],-1,-1,-1,-1,-1,-1,,,,
+66,"<android.accounts.AccountManager: AccountManagerFuture<Bundle> getAuthToken(Account,String,Bundle,Activity,AccountManagerCallback<Bundle>,Handler)>",5,6,"<android.accounts.AccountManager: AccountManagerFuture<Bundle> getAuthToken(Account,String,Bundle,Activity,AccountManagerCallback<Bundle>,Handler)>","<android.accounts.AccountManager: AccountManagerFuture<Bundle> getAuthToken(Account,String,Bundle,Activity,AccountManagerCallback<Bundle>,Handler)>",0,"{
+    if (activity == null)
+        throw new IllegalArgumentException(""activity is null"");
+    if (authTokenType == null)
+        throw new IllegalArgumentException(""authTokenType is null"");
+    return new AmsTask(activity, handler, callback) {
+
+        public void doWork() throws RemoteException {
+            mService.getAuthToken(mResponse, account, authTokenType, false, /* notifyOnAuthFailure */
+            true, /* expectActivityLaunch */
+            loginOptions);
+        }
+    }.start();
+}","{
+    if (activity == null)
+        throw new IllegalArgumentException(""activity is null"");
+    if (authTokenType == null)
+        throw new IllegalArgumentException(""authTokenType is null"");
+    return new AmsTask(activity, handler, callback) {
+
+        public void doWork() throws RemoteException {
+            mService.getAuthToken(mResponse, account, authTokenType, false, /* notifyOnAuthFailure */
+            true, /* expectActivityLaunch */
+            options);
+        }
+    }.start();
+}",1,"/**
+ * Request the auth token for this account/authTokenType. If this succeeds then the
+ * auth token will then be passed to the activity. If this results in an authentication
+ * failure then a login intent will be returned that can be invoked to prompt the user to
+ * update their credentials. This login activity will return the auth token to the calling
+ * activity. If activity is null then the login intent will not be invoked.
+ *
+ * @param account the account whose auth token should be retrieved
+ * @param authTokenType the auth token type that should be retrieved
+ * @param loginOptions
+ * @param activity the activity to launch the login intent, if necessary, and to which
+ */
+","/**
+ * Request that an authtoken of the specified type be returned for an account.
+ * If the Account Manager has a cached authtoken of the requested type then it will
+ * service the request itself. Otherwise it will pass the request on to the authenticator.
+ * The authenticator can try to service this request with information it already has stored
+ * in the AccountManager but may need to launch an activity to prompt the
+ * user to enter credentials. If it is able to retrieve the authtoken it will be returned
+ * in the result.
+ * <p>
+ * If the authenticator needs to prompt the user for credentials it will return an intent to
+ * the activity that will do the prompting. If an activity is supplied then that activity
+ * will be used to launch the intent and the result will come from it. Otherwise a result will
+ * be returned that contains the intent.
+ * <p>
+ * This call returns immediately but runs asynchronously and the result is accessed via the
+ * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
+ * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
+ * method asynchronously then they will generally pass in a callback object that will get
+ * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
+ * they will generally pass null for the callback and instead call
+ * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
+ * which will then block until the request completes.
+ * <p>
+ * Requires that the caller has permission {@link android.Manifest.permission#USE_CREDENTIALS}.
+ *
+ * @param account The account whose credentials are to be updated.
+ * @param authTokenType the auth token to retrieve as part of updating the credentials.
+ * May be null.
+ * @param options authenticator specific options for the request
+ * @param activity If the authenticator returns a {@link #KEY_INTENT} in the result then
+ * the intent will be started with this activity. If activity is null then the result will
+ * be returned as-is.
+ * @param callback A callback to invoke when the request completes. If null then
+ * no callback is invoked.
+ * @param handler The {@link Handler} to use to invoke the callback. If null then the
+ * main thread's {@link Handler} is used.
+ * @return an {@link AccountManagerFuture} that represents the future result of the call.
+ * The future result is a {@link Bundle} that contains:
+ * <ul>
+ * <li> {@link #KEY_ACCOUNT_NAME}, {@link #KEY_ACCOUNT_TYPE} and {@link #KEY_AUTHTOKEN}
+ * </ul>
+ * If the user presses ""back"" then the request will be canceled.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"4,5",1,"The variable 'loginOptions' has been replaced by 'options', so the code change type is 4. Moreover, the variable change is within the calling of 'mService.getAuthToken()' which is a dependent API, thus the change type is also classified as 5.","The method 'mService.getAuthToken()' uses a different parameter ('options' instead of 'loginOptions'), which can potentially lead to different return values from it. Although the returned value is not directly returned by the API, it does affect the initiation of 'new AmsTask' which is eventually returned. Therefore, it could still induce a CI. Hence, the CI type is 1."
+68,"<android.accounts.AccountManager: AccountManagerFuture<Bundle> addAccount(String,String,String[],Bundle,Activity,AccountManagerCallback<Bundle>,Handler)>",5,6,"<android.accounts.AccountManager: AccountManagerFuture<Bundle> addAccount(String,String,String[],Bundle,Activity,AccountManagerCallback<Bundle>,Handler)>","<android.accounts.AccountManager: AccountManagerFuture<Bundle> addAccount(String,String,String[],Bundle,Activity,AccountManagerCallback<Bundle>,Handler)>",0,"{
+    return new AmsTask(activity, handler, callback) {
+
+        public void doWork() throws RemoteException {
+            mService.addAcount(mResponse, accountType, authTokenType, requiredFeatures, activity != null, addAccountOptions);
+        }
+    }.start();
+}","{
+    return new AmsTask(activity, handler, callback) {
+
+        public void doWork() throws RemoteException {
+            if (accountType == null) {
+                Log.e(TAG, ""the account must not be null"");
+                // to unblock caller waiting on Future.get()
+                set(new Bundle());
+                return;
+            }
+            mService.addAcount(mResponse, accountType, authTokenType, requiredFeatures, activity != null, addAccountOptions);
+        }
+    }.start();
+}",1,,"/**
+ * Request that an account be added with the given accountType. This request
+ * is processed by the authenticator for the account type. If no authenticator is registered
+ * in the system then {@link AuthenticatorException} is thrown.
+ * <p>
+ * This call returns immediately but runs asynchronously and the result is accessed via the
+ * {@link AccountManagerFuture} that is returned. This future is also passed as the sole
+ * parameter to the {@link AccountManagerCallback}. If the caller wished to use this
+ * method asynchronously then they will generally pass in a callback object that will get
+ * invoked with the {@link AccountManagerFuture}. If they wish to use it synchronously then
+ * they will generally pass null for the callback and instead call
+ * {@link android.accounts.AccountManagerFuture#getResult()} on this method's return value,
+ * which will then block until the request completes.
+ * <p>
+ * Requires that the caller has permission {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+ *
+ * @param accountType The type of account to add. This must not be null.
+ * @param authTokenType The account that is added should be able to service this auth token
+ * type. This may be null.
+ * @param requiredFeatures The account that is added should support these features.
+ * This array may be null or empty.
+ * @param addAccountOptions A bundle of authenticator-specific options that is passed on
+ * to the authenticator. This may be null.
+ * @param activity If the authenticator returns a {@link #KEY_INTENT} in the result then
+ * the intent will be started with this activity. If activity is null then the result will
+ * be returned as-is.
+ * @param callback A callback to invoke when the request completes. If null then
+ * no callback is invoked.
+ * @param handler The {@link Handler} to use to invoke the callback. If null then the
+ * main thread's {@link Handler} is used.
+ * @return an {@link AccountManagerFuture} that represents the future result of the call.
+ * The future result is a {@link Bundle} that contains either:
+ * <ul>
+ * <li> {@link #KEY_INTENT}, or
+ * <li> {@link #KEY_ACCOUNT_NAME}, {@link #KEY_ACCOUNT_TYPE}
+ * and {@link #KEY_AUTHTOKEN} (if an authTokenType was specified).
+ * </ul>
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,"3,4",1,"An if condition has been added in the late Implementation, which checks if accountType is null and if true, logs an error, sets a new bundle and performs a return operation, so the change is a Control dependency change(3). In addition, a new invocation of the Log.e(), and set(new Bundle()) methods are introduced which are not return statements, exception handling or control dependency changes, hence it counts as an Other statement change(4).","As a new control dependency statement has been introduced, which performs a return operation, this change can potentially cause the API to return a different value in the late version. In cases where the accountType is null, the late version of the API will return a new bundle instead of an account object. Hence, this is a Compatibility issue caused by potential different return values or Types(1)."
+69,<android.webkit.WebView: void findNext(boolean)>,5,6,<android.webkit.WebView: void findNext(boolean)>,<android.webkit.WebView: void findNext(boolean)>,0,"{
+    nativeFindNext(forward);
+}","{
+    // client isn't initialized
+    if (0 == mNativeClass)
+        return;
+    nativeFindNext(forward);
+}",1,"/*
+     * Highlight and scroll to the next occurance of String in findAll.
+     * Wraps the page infinitely, and scrolls.  Must be called after
+     * calling findAll.
+     *
+     * @param forward Direction to search.
+     */
+","/*
+     * Highlight and scroll to the next occurance of String in findAll.
+     * Wraps the page infinitely, and scrolls.  Must be called after
+     * calling findAll.
+     *
+     * @param forward Direction to search.
+     */
+",-1,,,-1,-1,-1,-1,-1,-1,"3,4",0,"A new control statement is introduced which checks if 'mNativeClass' is 0 and other statements are added in the late version, so the code change type is 3,4.","The new control statement and additional operations does not alter the return values/types or exception handling of the API, so no Compatibility Issue(CI) exists, hence CI type is 0."
+70,"<android.app.WallpaperManager: void setWallpaperOffsets(IBinder,float,float)>",5,6,"<android.app.WallpaperManager: void setWallpaperOffsets(IBinder,float,float)>","<android.app.WallpaperManager: void setWallpaperOffsets(IBinder,float,float)>",0,"{
+    try {
+        // Log.v(TAG, ""Sending new wallpaper offsets from app..."");
+        ViewRoot.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(windowToken, xOffset, yOffset);
+    // Log.v(TAG, ""...app returning after sending offsets!"");
+    } catch (RemoteException e) {
+    // Ignore.
+    }
+}","{
+    try {
+        // Log.v(TAG, ""Sending new wallpaper offsets from app..."");
+        ViewRoot.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(windowToken, xOffset, yOffset, mWallpaperXStep, mWallpaperYStep);
+    // Log.v(TAG, ""...app returning after sending offsets!"");
+    } catch (RemoteException e) {
+    // Ignore.
+    }
+}",1,"/**
+ * Set the position of the current wallpaper within any larger space, when
+ * that wallpaper is visible behind the given window.  The X and Y offsets
+ * are floating point numbers ranging from 0 to 1, representing where the
+ * wallpaper should be positioned within the screen space.  These only
+ * make sense when the wallpaper is larger than the screen.
+ *
+ * @param windowToken The window who these offsets should be associated
+ * with, as returned by {@link android.view.View#getWindowToken()
+ * View.getWindowToken()}.
+ * @param xOffset The offset olong the X dimension, from 0 to 1.
+ * @param yOffset The offset along the Y dimension, from 0 to 1.
+ */
+","/**
+ * Set the position of the current wallpaper within any larger space, when
+ * that wallpaper is visible behind the given window.  The X and Y offsets
+ * are floating point numbers ranging from 0 to 1, representing where the
+ * wallpaper should be positioned within the screen space.  These only
+ * make sense when the wallpaper is larger than the screen.
+ *
+ * @param windowToken The window who these offsets should be associated
+ * with, as returned by {@link android.view.View#getWindowToken()
+ * View.getWindowToken()}.
+ * @param xOffset The offset along the X dimension, from 0 to 1.
+ * @param yOffset The offset along the Y dimension, from 0 to 1.
+ */
+",-1,,,-1,-1,-1,-1,-1,-1,5,0,"The dependent API ViewRoot.getWindowSession(mContext.getMainLooper()).setWallpaperPosition has been changed with two more parameters being added in the late version, which falls under change type 5.","No Compatibility Issue exists because the two more parameters do not alter the behavior of the method, and the exception handling remains the same between the two versions. Thus, the CI type is 0."
+71,"<android.accounts.AbstractAccountAuthenticator.Transport: void getAuthToken(IAccountAuthenticatorResponse,Account,String,Bundle)>",5,6,"<android.accounts.AbstractAccountAuthenticator.Transport: void getAuthToken(IAccountAuthenticatorResponse,Account,String,Bundle)>","<android.accounts.AbstractAccountAuthenticator.Transport: void getAuthToken(IAccountAuthenticatorResponse,Account,String,Bundle)>",0,"{
+    checkBinderPermission();
+    try {
+        final Bundle result = AbstractAccountAuthenticator.this.getAuthToken(new AccountAuthenticatorResponse(response), account, authTokenType, loginOptions);
+        if (result != null) {
+            response.onResult(result);
+        } else {
+            response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, ""no response from the authenticator"");
+        }
+    } catch (UnsupportedOperationException e) {
+        response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION, ""getAuthToken not supported"");
+    } catch (NetworkErrorException e) {
+        response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+    }
+}","{
+    checkBinderPermission();
+    try {
+        final Bundle result = AbstractAccountAuthenticator.this.getAuthToken(new AccountAuthenticatorResponse(response), account, authTokenType, loginOptions);
+        if (result != null) {
+            response.onResult(result);
+        }
+    } catch (UnsupportedOperationException e) {
+        response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION, ""getAuthToken not supported"");
+    } catch (NetworkErrorException e) {
+        response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+    }
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,1,1,"The 'else' statement which returns an error when the 'result' is null in the early version is removed in the late version, so the code change type is classified as 1.","The removed 'else' statement could potentially lead to a different returned error when the 'result' is null, making the API potentially return different values, hence the CI type is classified as 1."
+72,<android.content.res.AssetManager: int createTheme()>,5,6,<android.content.res.AssetManager: int createTheme()>,<android.content.res.AssetManager: int createTheme()>,0,"{
+    synchronized (mSync) {
+        if (!mOpen) {
+            throw new RuntimeException(""Assetmanager has been closed"");
+        }
+        mNumRefs++;
+        return newTheme();
+    }
+}","{
+    synchronized (this) {
+        if (!mOpen) {
+            throw new RuntimeException(""Assetmanager has been closed"");
+        }
+        mNumRefs++;
+        return newTheme();
+    }
+}",1,"/*package*/
+","/*package*/
+",-1,,,-1,-1,-1,-1,-1,-1,3,0,"The only change between the two versions is in the object used for synchronization. In the earlier version, the method was synchronized using 'mSync', while in the later version, 'this' was used for synchronization. Thus, the change type is 3.","This change in synchronization object does not affect the return value or the exception handling of the method. Thus, no Compatibility Issue exists, and the CI type is 0."
+73,"<android.accounts.AbstractAccountAuthenticator.Transport: void addAccount(IAccountAuthenticatorResponse,String,String,String[],Bundle)>",5,6,"<android.accounts.AbstractAccountAuthenticator.Transport: void addAccount(IAccountAuthenticatorResponse,String,String,String[],Bundle)>","<android.accounts.AbstractAccountAuthenticator.Transport: void addAccount(IAccountAuthenticatorResponse,String,String,String[],Bundle)>",0,"{
+    checkBinderPermission();
+    final Bundle result;
+    try {
+        result = AbstractAccountAuthenticator.this.addAccount(new AccountAuthenticatorResponse(response), accountType, authTokenType, requiredFeatures, options);
+    } catch (NetworkErrorException e) {
+        response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+        return;
+    } catch (UnsupportedOperationException e) {
+        response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION, ""addAccount not supported"");
+        return;
+    }
+    if (result != null) {
+        response.onResult(result);
+    } else {
+        response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, ""no response from the authenticator"");
+    }
+}","{
+    checkBinderPermission();
+    try {
+        final Bundle result = AbstractAccountAuthenticator.this.addAccount(new AccountAuthenticatorResponse(response), accountType, authTokenType, requiredFeatures, options);
+        if (result != null) {
+            response.onResult(result);
+        }
+    } catch (NetworkErrorException e) {
+        response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+    } catch (UnsupportedOperationException e) {
+        response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION, ""addAccount not supported"");
+    }
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"1,2","1,2","Two return statements are deleted. The declaration and initialization of 'result' has been moved into the 'try' block, and the conditional statement 'if' also moved into the 'try' block. The change type is 1,2.","The termination of the method through return statement in the catch blocks has been removed which would change the flow of the method. In addition, the response.onError when result == null is deleted in the late version, thus the it potentially returns diffferent values with the early version. Therefore, the CI type is 1,2."
+74,"<android.content.SyncManager.SyncQueue: void clear(Account,String)>",5,6,"<android.content.SyncManager.SyncQueue: void clear(Account,String)>","<android.content.SyncManager.SyncQueue: void clear(Account,String)>",0,"{
+    Iterator<Map.Entry<String, SyncOperation>> entries = mOpsByKey.entrySet().iterator();
+    while (entries.hasNext()) {
+        Map.Entry<String, SyncOperation> entry = entries.next();
+        SyncOperation syncOperation = entry.getValue();
+        if (account != null && !syncOperation.account.equals(account))
+            continue;
+        if (authority != null && !syncOperation.authority.equals(authority))
+            continue;
+        if (DEBUG_CHECK_DATA_CONSISTENCY)
+            debugCheckDataStructures(true);
+        entries.remove();
+        if (!mOpsByWhen.remove(syncOperation)) {
+            throw new IllegalStateException(""unable to find "" + syncOperation + "" in mOpsByWhen"");
+        }
+        if (!mSyncStorageEngine.deleteFromPending(syncOperation.pendingOperation)) {
+            throw new IllegalStateException(""unable to find pending row for "" + syncOperation);
+        }
+        if (DEBUG_CHECK_DATA_CONSISTENCY)
+            debugCheckDataStructures(true);
+    }
+}","{
+    Iterator<Map.Entry<String, SyncOperation>> entries = mOpsByKey.entrySet().iterator();
+    while (entries.hasNext()) {
+        Map.Entry<String, SyncOperation> entry = entries.next();
+        SyncOperation syncOperation = entry.getValue();
+        if (account != null && !syncOperation.account.equals(account))
+            continue;
+        if (authority != null && !syncOperation.authority.equals(authority))
+            continue;
+        if (DEBUG_CHECK_DATA_CONSISTENCY)
+            debugCheckDataStructures(true);
+        entries.remove();
+        if (!mOpsByWhen.remove(syncOperation)) {
+            throw new IllegalStateException(""unable to find "" + syncOperation + "" in mOpsByWhen"");
+        }
+        if (!mSyncStorageEngine.deleteFromPending(syncOperation.pendingOperation)) {
+            final String errorMessage = ""unable to find pending row for "" + syncOperation;
+            Log.e(TAG, errorMessage, new IllegalStateException(errorMessage));
+        }
+        if (DEBUG_CHECK_DATA_CONSISTENCY)
+            debugCheckDataStructures(true);
+    }
+}",1,,,-1,,,-1,-1,-1,-1,-1,-1,"2,4",2,"In the late version of the code, the exception handling method has changed from throwing an IllegalStateException immediately to logging an error message and creating a new instance of IllegalStateException (which is not thrown). Additionally, there is a new statement creating a string for the error message. Therefore, the code change type is 2,4.","The late version of the API handles exceptions differently from the early version. The change in exception handling (from throwing an exception to logging an error message) could affect the API's execution flow when encountering the same situation, leading to a different behaviour. Therefore, the compatibility issue (CI) type is 2."
