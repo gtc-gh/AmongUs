@@ -9,27 +9,14 @@ Output:
 A CSV file which contains all retrieved methods information. Primary key is signature.
 Another CSV file which contains all retrieved fields information. Primary key is variable name.
 
-# RQ1
+--------------------------------------------------------------------------------------
+
+## RQ1
 LLMs experiment results (AST, API body, API comment) on our 407 groundtruth dataset. Version 4-33 retrieved AOSP method lists can be found in the shared link.
 method_list.txt: The list of the current API (Method) from version 4 to version 33. (SDK version 11 to 13 are omitted, because Android 3 is non-free software and Google does not provide public available Android 3 source code.)
 groundtruth_407.csv: 407 Groud Truth. The API with Manual check.
 
-# RQ2
-
-# RQ3
-
-# Item description
-
-- Item 1 (1_method_list): The list of the current API (Method) from version 4 to version 33. (SDK version 11 to 13 are omitted, because Android 3 is non-free software and Google does not provide public available Android 3 source code.)
-- Item 2 (2_field_list): The list of the current API (Field) from version 4 to version 33. (SDK version 11 to 13 are omitted, because Android 3 is non-free software and Google does not provide public available Android 3 source code.)
-- Item 3 (3_groundtruth_307): 307 Groud Truth. The API with Manual check.
-- Item 4 (4_signature_incompatible_API_list): The list of the signature incompatible API.
-- Item 5 (5_pred_results): The list of the semantic incompatible API.
-
---------------------------------------------------------------------------------------
-
-# Item 4 and 5 data's indexes description
-
+### indexes description
 - Number: Serial number
 - Signature (a string): The signature of the current API (Method).
 - Early_Version: The earlier version of the API
@@ -98,4 +85,25 @@ Note: for CIs that fall into multiple categories, it will be separated by ',', e
 
 --------
 - change_description: The reason why GPT-4 predicted such the change type between two versions.
-- CI_description: The reason why GPT-4 predicted such the root reason type of (In)Compatibility Issue. 
+- CI_description: The reason why GPT-4 predicted such the root reason type of (In)Compatibility Issue.
+
+--------------------------------------------------------------------------------------
+
+
+## RQ2
+pred_results_{x}_{x+1}.csv: 3 < x < 33. The list of LLMs prediction results between the successive versions x and x+1. 
+Signature_semantic_incompatible_API_list.txt: Google drive shared link.
+signature_incompatible_API_list.csv: The list of the signature incompatible APIs.
+Semantic_results.csv: The list of the semantic incompatible APIs.
+Semantic_pred_results.csv: The list of predicted semantic results, including all APIs with compatibility issues and those without compatibility issues.
+
+--------------------------------------------------------------------------------------
+
+## RQ3
+10,000 real apps shared by Google Drive.
+
+--------------------------------------------------------------------------------------
+
+
+
+
