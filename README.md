@@ -2,7 +2,7 @@
 
 This release includes the experimental results that are used for the ASE artifact analysis. All the results are described in our paper. All required artifacts are attached to this release.
 
-# Information Extraction
+## Information Extraction
 The project is used to retrieve all relevant information from a specific version of AOSP to 2 CSV files. The maiximize length for a single cell is 32767.
 Input: path to a specific version of AOSP.
 Output:
