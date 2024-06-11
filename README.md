@@ -2,6 +2,22 @@
 
 This release includes the experimental results that are used for the ASE artifact analysis. All the results are described in our paper. All required artifacts are attached to this release.
 
+# Information Extraction
+The project is used to retrieve all relevant information from a specific version of AOSP to 2 CSV files. The maiximize length for a single cell is 32767.
+Input: path to a specific version of AOSP.
+Output:
+A CSV file which contains all retrieved methods information. Primary key is signature.
+Another CSV file which contains all retrieved fields information. Primary key is variable name.
+
+# RQ1
+LLMs experiment results (AST, API body, API comment) on our 407 groundtruth dataset. Version 4-33 retrieved AOSP method lists can be found in the shared link.
+method_list.txt: The list of the current API (Method) from version 4 to version 33. (SDK version 11 to 13 are omitted, because Android 3 is non-free software and Google does not provide public available Android 3 source code.)
+groundtruth_407.csv: 407 Groud Truth. The API with Manual check.
+
+# RQ2
+
+# RQ3
+
 # Item description
 
 - Item 1 (1_method_list): The list of the current API (Method) from version 4 to version 33. (SDK version 11 to 13 are omitted, because Android 3 is non-free software and Google does not provide public available Android 3 source code.)
